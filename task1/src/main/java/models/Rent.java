@@ -7,7 +7,7 @@ public class Rent {
     private LocalDateTime beginTime;
     private LocalDateTime endTime;
     private int rentCost;
-    private boolean archive;
+    private boolean archive = false;
     private Client client;
     private Item item;
 
@@ -16,7 +16,6 @@ public class Rent {
         this.beginTime = beginTime;
         this.client = client;
         this.item = item;
-        this.archive = false; // Domyślnie nie zarchiwizowane
     }
 
     public void endRent(LocalDateTime endTime) {

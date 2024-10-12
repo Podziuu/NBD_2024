@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 @Entity
 public class Client {
     @Id
-    private String personalID;
+    private long personalID;
     @Column(name = "first_name")
     private String firstName;
     @Column(name = "last_name")
@@ -17,7 +17,7 @@ public class Client {
     public Client() {
     }
 
-    public Client(String personalID, String firstName, String lastName, ClientType clientType) {
+    public Client(long personalID, String firstName, String lastName, ClientType clientType) {
         this.personalID = personalID;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -28,7 +28,7 @@ public class Client {
         return "Klient: \n Imię: " + firstName + "\n Nazwisko: " + lastName + "\n Pesel: " + personalID;
     }
 
-    public String getPersonalId() {
+    public long getPersonalId() {
         return personalID;
     }
 

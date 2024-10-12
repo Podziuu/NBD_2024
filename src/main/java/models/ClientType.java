@@ -13,12 +13,15 @@ public class ClientType {
 
     protected int maxArticles;
     protected int discount;
+    @Column(name = "type_name")
+    protected String typeName;
 
     // Konstruktory
     public ClientType() {
     }
 
-    public ClientType(int maxArticles, int discount) {
+    public ClientType(String typeName, int maxArticles, int discount) {
+        this.typeName = typeName;
         this.maxArticles = maxArticles;
         this.discount = discount;
     }
@@ -34,6 +37,10 @@ public class ClientType {
 
     public int getMaxArticles() {
         return maxArticles;
+    }
+
+    public void setDiscount(int discount) {
+        this.discount = discount;
     }
 
     public int applyDiscount(int price) {

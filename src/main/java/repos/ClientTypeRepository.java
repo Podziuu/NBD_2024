@@ -22,6 +22,14 @@ public class ClientTypeRepository implements Repository<ClientType> {
         }
     }
 
+    public ClientType getByType(String type) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            return entityManager.createQuery("SELECT c FROM ClientType c WHERE c.typeName = :type", ClientType.class)
+                    .setParameter("type", type)
+                    .getSingleResult();
+        }
+    }
+
     @Override
     public void update(ClientType clientType) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
@@ -35,7 +43,8 @@ public class ClientTypeRepository implements Repository<ClientType> {
     public void delete(ClientType clientType) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
-            entityManager.remove(clientType);
+            ClientType managedClientType = entityManager.find(ClientType.class, clientType.getId());
+            entityManager.remove(managedClientType);
             entityManager.getTransaction().commit();
         }
     }

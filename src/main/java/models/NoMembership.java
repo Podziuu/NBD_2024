@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class NoMembership extends ClientType {
 
     public NoMembership() {
-        super(5, 0);
+        super("NoMembership", 5, 0);
     }
 
 //    @Override

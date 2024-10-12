@@ -1,16 +1,19 @@
 package models;
 
+import jakarta.persistence.*;
+
+@Entity
+@DiscriminatorValue("Membership")
 public class Membership extends ClientType {
 
     public Membership() {
-        this.maxArticles = 10; // np. ustawiamy maksymalną ilość artykułów dla członków
-        this.discount = 20; // np. zniżka w procentach dla członków
+        super(10, 20);
     }
 
-    @Override
-    public int applyDiscount(int price) {
-        return price - (price * discount / 100);
-    }
+//    @Override
+//    public int applyDiscount(int price) {
+//        return price - (price * discount / 100);
+//    }
 
     @Override
     public String getClientTypeInfo() {

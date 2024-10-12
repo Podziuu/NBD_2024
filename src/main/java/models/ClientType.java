@@ -1,21 +1,81 @@
 package models;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "client_types")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "dtype")
 public class ClientType {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // Używaj Long zamiast String, aby łatwiej zarządzać ID
+
     protected int maxArticles;
     protected int discount;
 
+    // Konstruktory
     public ClientType() {
     }
+
+    public ClientType(int maxArticles, int discount) {
+        this.maxArticles = maxArticles;
+        this.discount = discount;
+    }
+
+    // Gettery i settery
+    public Long getId() {
+        return id;
+    }
+
+//    public String getTypeName() {
+//        return typeName;
+//    }
 
     public int getMaxArticles() {
         return maxArticles;
     }
 
     public int applyDiscount(int price) {
-        return price;
+        return price - (price * discount / 100);
     }
 
     public String getClientTypeInfo() {
-        return "\nMaksymalna ilość wypożyczonych artykułów: " + this.getMaxArticles();
+        return "typeName" + ": " + maxArticles + " articles, discount: " + discount + "%";
     }
 }
+
+
+//package models;
+//
+//import jakarta.persistence.*;
+//
+//@Entity
+//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+//public class ClientType {
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private long id;
+//    @Column(name = "max_articles")
+//    protected int maxArticles;
+//    protected int discount;
+//
+//    public ClientType() {
+//    }
+//
+//    public long getId() {
+//        return id;
+//    }
+//
+//    public int getMaxArticles() {
+//        return maxArticles;
+//    }
+//
+//    public int applyDiscount(int price) {
+//        return price;
+//    }
+//
+//    public String getClientTypeInfo() {
+//        return "\nMaksymalna ilość wypożyczonych artykułów: " + this.getMaxArticles();
+//    }
+//}

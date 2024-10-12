@@ -3,40 +3,39 @@ package repos;
 import models.*;
 import jakarta.persistence.*;
 
-
-public class ClientRepository implements Repository<Client> {
+public class ClientTypeRepository implements Repository<ClientType> {
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
 
     @Override
-    public void create(Client client) {
+    public void create(ClientType clientType) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
-            entityManager.persist(client);
+            entityManager.persist(clientType);
             entityManager.getTransaction().commit();
         }
     }
 
     @Override
-    public Client get(long id) {
+    public ClientType get(long id) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            return entityManager.find(Client.class, id);
+            return entityManager.find(ClientType.class, id);
         }
     }
 
     @Override
-    public void update(Client client) {
+    public void update(ClientType clientType) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
-            entityManager.merge(client);
+            entityManager.merge(clientType);
             entityManager.getTransaction().commit();
         }
     }
 
     @Override
-    public void delete(Client client) {
+    public void delete(ClientType clientType) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
-            entityManager.remove(client);
+            entityManager.remove(clientType);
             entityManager.getTransaction().commit();
         }
     }

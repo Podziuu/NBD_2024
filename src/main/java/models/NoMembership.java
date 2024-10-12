@@ -1,16 +1,19 @@
 package models;
 
+import jakarta.persistence.*;
+
+@Entity
+@DiscriminatorValue("NoMembership")
 public class NoMembership extends ClientType {
 
     public NoMembership() {
-        this.maxArticles = 5; // Mniejsza liczba artykułów dla nieczłonków
-        this.discount = 0; // Brak zniżki
+        super(5, 0);
     }
 
-    @Override
-    public int applyDiscount(int price) {
-        return price; // Brak zniżki, zwracamy pełną cenę
-    }
+//    @Override
+//    public int applyDiscount(int price) {
+//        return price; // Brak zniżki, zwracamy pełną cenę
+//    }
 
     @Override
     public String getClientTypeInfo() {

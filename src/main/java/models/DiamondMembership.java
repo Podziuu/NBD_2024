@@ -1,10 +1,13 @@
 package models;
 
-public class DiamondMembership extends Membership {
+import jakarta.persistence.*;
+
+@Entity
+@DiscriminatorValue("DiamondMembership")
+public class DiamondMembership extends ClientType {
 
     public DiamondMembership() {
-        this.maxArticles = 15; // Więcej artykułów dla diamentowych członków
-        this.discount = 30; // Większa zniżka
+       super(15, 30);
     }
 
     @Override

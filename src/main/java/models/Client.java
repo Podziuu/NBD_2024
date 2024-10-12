@@ -1,11 +1,21 @@
 package models;
 
+import jakarta.persistence.*;
+
+@Entity
 public class Client {
+    @Id
     private String personalID;
+    @Column(name = "first_name")
     private String firstName;
+    @Column(name = "last_name")
     private String lastName;
     private boolean archive;
+    @ManyToOne
     private ClientType clientType;
+
+    public Client() {
+    }
 
     public Client(String personalID, String firstName, String lastName, ClientType clientType) {
         this.personalID = personalID;

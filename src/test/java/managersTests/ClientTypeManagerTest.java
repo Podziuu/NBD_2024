@@ -2,7 +2,6 @@ package managersTests;
 
 import org.junit.jupiter.api.*;
 import managers.*;
-import repos.*;
 import models.*;
 
 public class ClientTypeManagerTest {
@@ -14,7 +13,7 @@ public class ClientTypeManagerTest {
         clientTypeManager.createClientType(clientType);
         Assertions.assertEquals(clientType.getClientTypeInfo(), clientTypeManager.getClientType(clientType.getId()).getClientTypeInfo());
     }
-    
+
     @Test
     public void createBasicClientTypesTest() {
         ClientTypeManager clientTypeManager = new ClientTypeManager();

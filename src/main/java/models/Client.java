@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 @Entity
 public class Client {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long personalID;
     @Column(name = "first_name")
     private String firstName;
@@ -17,8 +18,8 @@ public class Client {
     public Client() {
     }
 
-    public Client(long personalID, String firstName, String lastName, ClientType clientType) {
-        this.personalID = personalID;
+    public Client(String firstName, String lastName, ClientType clientType) {
+//        this.personalID = personalID;
         this.firstName = firstName;
         this.lastName = lastName;
         this.clientType = clientType;

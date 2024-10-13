@@ -17,16 +17,9 @@ public class ClientManager {
         this.clientTypeManager = new ClientTypeManager();
     }
 
-    public void createClient(long personalId, String firstName, String lastName, String clientType)
-            throws ClientExistsException, IllegalArgumentException {
-        if (clientRepository.get(personalId) != null) {
-            throw new ClientExistsException();
-        }
+    public void createClient(String firstName, String lastName, String clientType) {
         ClientType type = clientTypeManager.getClientTypeByType(clientType);
-        if (type == null) {
-            throw new IllegalArgumentException("Invalid client type.");
-        }
-        clientRepository.create(new Client(personalId, firstName, lastName, type));
+        clientRepository.create(new Client(firstName, lastName, type));
     }
 
     public Client getClient(long id) {
@@ -42,15 +35,16 @@ public class ClientManager {
     }
 
     public void updateClient(long id, String firstName, String lastName, String clientType)
-            throws ClientNotExistsException, IllegalArgumentException {
+            throws ClientNotExistsException {
         if (clientRepository.get(id) == null) {
             throw new ClientNotExistsException();
         }
         ClientType type = clientTypeManager.getClientTypeByType(clientType);
-        if (type == null) {
-            throw new IllegalArgumentException("Invalid client type.");
-        }
-        clientRepository.update(new Client(id, firstName, lastName, type));
+        Client client = clientRepository.get(id);
+        client.setFirstName(firstName);
+        client.setLastName(lastName);
+        client.setClientType(type);
+        clientRepository.update(client);
     }
 
     public void archiveClient(long id) throws ClientNotExistsException {

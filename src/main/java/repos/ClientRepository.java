@@ -36,7 +36,8 @@ public class ClientRepository implements Repository<Client> {
     public void delete(Client client) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
-            entityManager.remove(client);
+            Client managedClientType = entityManager.find(Client.class, client.getPersonalId());
+            entityManager.remove(managedClientType);
             entityManager.getTransaction().commit();
         }
     }

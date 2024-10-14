@@ -1,14 +1,25 @@
 package models;
 
+import jakarta.persistence.*;
+
+@Entity
 public class Client {
-    private String personalID;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long personalID;
+    @Column(name = "first_name")
     private String firstName;
+    @Column(name = "last_name")
     private String lastName;
     private boolean archive;
+    @ManyToOne
     private ClientType clientType;
 
-    public Client(String personalID, String firstName, String lastName, ClientType clientType) {
-        this.personalID = personalID;
+    public Client() {
+    }
+
+    public Client(String firstName, String lastName, ClientType clientType) {
+//        this.personalID = personalID;
         this.firstName = firstName;
         this.lastName = lastName;
         this.clientType = clientType;
@@ -18,7 +29,7 @@ public class Client {
         return "Klient: \n Imię: " + firstName + "\n Nazwisko: " + lastName + "\n Pesel: " + personalID;
     }
 
-    public String getPersonalId() {
+    public long getPersonalId() {
         return personalID;
     }
 

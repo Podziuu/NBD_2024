@@ -1,69 +1,62 @@
 package repos;
 
-import exceptions.LogicException;
-import models.Client;
+import models.*;
+import jakarta.persistence.*;
 
-import java.util.ArrayList;
-import java.util.List;
 
-public class ClientRepository {
-    private List<Client> clientRepositoryList;
+public class ClientRepository implements Repository<Client> {
+    EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
 
-    public ClientRepository() {
-        clientRepositoryList = new ArrayList<>();
-    }
-
-    // Znalezienie klienta po jego ID
-    public Client find(String id) {
-        for (Client client : clientRepositoryList) {
-            if (client.getPersonalId().equals(id)) {
-                return client;
-            }
-        }
-        return null; // W Javie używamy null zamiast NULL z C++
-    }
-
-    // Pobranie klienta po indeksie
-    public Client get(int i) {
-        if (i >= clientRepositoryList.size()) {
-            return null;
-        }
-        return clientRepositoryList.get(i);
-    }
-
-    // Dodanie nowego klienta
-    public void add(Client client) throws LogicException {
-        if (client != null) {
-            if (find(client.getPersonalId()) != null) {
-                throw new LogicException("Client with this ID already exists in repository");
-            }
-            clientRepositoryList.add(client);
+    @Override
+    public void create(Client client) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            entityManager.persist(client);
+            entityManager.getTransaction().commit();
         }
     }
 
-    // Usunięcie klienta
-    public void remove(Client client) {
-        if (client != null) {
-            clientRepositoryList.removeIf(c -> c.equals(client)); // Użycie removeIf zamiast pętli for
+    @Override
+    public Client get(long id) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            return entityManager.find(Client.class, id);
         }
     }
 
-    // Generowanie raportu z listy klientów
-    public String report() {
-        StringBuilder report = new StringBuilder();
-        for (Client client : clientRepositoryList) {
-            report.append(client.getInfo());
+    @Override
+    public void update(Client client) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            entityManager.merge(client);
+            entityManager.getTransaction().commit();
         }
-        return report.toString();
     }
 
-    // Pobranie liczby klientów w repozytorium
-    public int getSize() {
-        return clientRepositoryList.size();
+    @Override
+    public void delete(Client client) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            Client managedClientType = entityManager.find(Client.class, client.getPersonalId());
+            entityManager.remove(managedClientType);
+            entityManager.getTransaction().commit();
+        }
     }
 
-    // Pobranie listy wszystkich klientów
-    public List<Client> getAll() {
-        return new ArrayList<>(clientRepositoryList); // Zwrócenie kopii listy klientów
+    public void archive(long id) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            Client client = entityManager.find(Client.class, id);
+            client.setArchive(true);
+            entityManager.getTransaction().commit();
+        }
+    }
+
+    public void unarchive(long id) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            Client client = entityManager.find(Client.class, id);
+            client.setArchive(false);
+            entityManager.getTransaction().commit();
+        }
     }
 }

@@ -3,35 +3,61 @@ package managers;
 import models.Client;
 import models.ClientType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import repos.ClientRepository;
+
+import exceptions.ClientExistsException;
+import exceptions.ClientNotExistsException;
 
 public class ClientManager {
-    private List<Client> clients;
+    private final ClientRepository clientRepository;
+    private final ClientTypeManager clientTypeManager;
 
     public ClientManager() {
-        this.clients = new ArrayList<>();
+        this.clientRepository = new ClientRepository();
+        this.clientTypeManager = new ClientTypeManager();
     }
 
-    public String report() {
-        StringBuilder report = new StringBuilder();
-        for (Client client : clients) {
-            report.append(client.getInfo()).append("\n");
+    public void createClient(String firstName, String lastName, String clientType) {
+        ClientType type = clientTypeManager.getClientTypeByType(clientType);
+        clientRepository.create(new Client(firstName, lastName, type));
+    }
+
+    public Client getClient(long id) {
+        return clientRepository.get(id);
+    }
+
+    public void deleteClient(long id) throws ClientNotExistsException {
+        if (clientRepository.get(id) == null) {
+            throw new ClientNotExistsException();
         }
-        return report.toString();
+        Client client = clientRepository.get(id);
+        clientRepository.delete(client);
     }
 
-    public List<Client> getAll() {
-        return clients;
+    public void updateClient(long id, String firstName, String lastName, String clientType)
+            throws ClientNotExistsException {
+        if (clientRepository.get(id) == null) {
+            throw new ClientNotExistsException();
+        }
+        ClientType type = clientTypeManager.getClientTypeByType(clientType);
+        Client client = clientRepository.get(id);
+        client.setFirstName(firstName);
+        client.setLastName(lastName);
+        client.setClientType(type);
+        clientRepository.update(client);
     }
 
-    public Optional<Client> find(String personalId) {
-        return clients.stream().filter(client -> client.getPersonalId().equals(personalId)).findFirst();
+    public void archiveClient(long id) throws ClientNotExistsException {
+        if (clientRepository.get(id) == null) {
+            throw new ClientNotExistsException();
+        }
+        clientRepository.archive(id);
     }
 
-    public void registerClient(String firstName, String lastName, String personalId, ClientType clientType) {
-        Client newClient = new Client(personalId, firstName, lastName, clientType);
-        clients.add(newClient);
+    public void unarchiveClient(long id) throws ClientNotExistsException {
+        if (clientRepository.get(id) == null) {
+            throw new ClientNotExistsException();
+        }
+        clientRepository.unarchive(id);
     }
 }

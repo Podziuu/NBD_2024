@@ -1,17 +1,34 @@
 package models;
 
+import javax.persistence.*;
+
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "item_type", discriminatorType = DiscriminatorType.STRING)
 public class Item {
-    protected String itemId;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "item_id")
+    protected Long itemId;
+
+    @Column(name = "base_price")
     protected int basePrice;
+
+    @Column(name = "item_name")
     protected String itemName;
+
     protected boolean available;
 
-    public Item(String itemId, int basePrice, String itemName) {
+
+    public Item(Long itemId, int basePrice, String itemName) {
         this.itemId = itemId;
         this.basePrice = basePrice;
         this.itemName = itemName;
-        this.available = true; // Domyślnie dostępny
+        this.available = true;
     }
+
+    public Item() {}
 
     public String getItemInfo() {
         return "Item ID: " + itemId + ", Name: " + itemName + ", Base Price: " + basePrice;
@@ -33,7 +50,7 @@ public class Item {
         return available;
     }
 
-    public String getItemId() {
+    public Long getItemId() {
         return itemId;
     }
 

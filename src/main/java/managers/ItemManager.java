@@ -1,53 +1,55 @@
 package managers;
 
-import models.Item;
-import models.Music;
-import models.Movie;
-import models.Comics;
+import exceptions.LogicException;
+import models.*;
+import repos.ItemRepository; // Zakładając, że istnieje klasa repozytorium dla przedmiotów
+import exceptions.ItemAvailableException;
+import exceptions.ItemNotAvailableException;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class ItemManager {
-    private List<Item> items;
+    private final ItemRepository itemRepository;
 
     public ItemManager() {
-        this.items = new ArrayList<>();
+        this.itemRepository = new ItemRepository();
     }
 
-    public void registerMusic(String itemId, int basePrice, String itemName, String genre, boolean vinyl) {
+    public void registerMusic(Long itemId, int basePrice, String itemName, MusicGenre genre, boolean vinyl)
+            throws ItemAvailableException, LogicException {
         Music music = new Music(itemId, basePrice, itemName, genre, vinyl);
-        items.add(music);
+        itemRepository.add(music);
     }
 
-    public void registerMovie(String itemId, int basePrice, String itemName, String genre, int minutes, boolean casette) {
+    public void registerMovie(Long itemId, int basePrice, String itemName, String genre, int minutes, boolean casette)
+            throws ItemAvailableException, LogicException {
         Movie movie = new Movie(itemId, basePrice, itemName, genre, minutes, casette);
-        items.add(movie);
+        itemRepository.add(movie);
     }
 
-    public void registerComics(String itemId, int basePrice, String itemName, int pagesNumber) {
+    public void registerComics(Long itemId, int basePrice, String itemName, int pagesNumber)
+            throws ItemAvailableException, LogicException {
         Comics comics = new Comics(itemId, basePrice, itemName, pagesNumber);
-        items.add(comics);
+        itemRepository.add(comics);
     }
 
     public String report() {
         StringBuilder report = new StringBuilder();
+        List<Item> items = itemRepository.getAll();
         for (Item item : items) {
             report.append(item.getItemInfo()).append("\n");
         }
         return report.toString();
     }
 
-    public List<Item> getAll() {
-        return items;
+    public Item find(String itemId) {
+        return itemRepository.find(itemId);
     }
 
-    public Optional<Item> find(String itemId) {
-        return items.stream().filter(item -> item.getItemId().equals(itemId)).findFirst();
-    }
-
-    public void removeItem(String itemId) {
-        items.removeIf(item -> item.getItemId().equals(itemId));
+    public void removeItem(String itemId) throws ItemNotAvailableException {
+        if (!find(itemId).isAvailable()) {
+            throw new ItemNotAvailableException();
+        }
+        itemRepository.remove(itemId);
     }
 }

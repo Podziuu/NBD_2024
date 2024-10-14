@@ -1,10 +1,20 @@
 package models;
 
+import jakarta.persistence.*;
+
+@Entity
+@DiscriminatorValue("Movie")
 public class Movie extends Item {
+
+    @Column(name = "movie_duration")
     private int minutes;
+
+    @Column(name = "is_cassette")
     private boolean casette;
 
-    public Movie(String itemId, int basePrice, String itemName, String genre, int minutes, boolean casette) {
+    public Movie() {}
+
+    public Movie(Long itemId, int basePrice, String itemName, String genre, int minutes, boolean casette) {
         super(itemId, basePrice, itemName);
         this.minutes = minutes;
         this.casette = casette;
@@ -21,5 +31,13 @@ public class Movie extends Item {
 
     public boolean isCasette() {
         return casette;
+    }
+
+    public void setMinutes(int minutes) {
+        this.minutes = minutes;
+    }
+
+    public void setCasette(boolean casette) {
+        this.casette = casette;
     }
 }

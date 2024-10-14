@@ -2,62 +2,46 @@
 package repos;
 
 import exceptions.LogicException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import models.Item;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ItemRepository implements Repository<Item> {
+    EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default" );
 
-public class ItemRepository {
-    private List<Item> itemRepositoryList;
-
-    public ItemRepository() {
-        itemRepositoryList = new ArrayList<>();
-    }
-
-    public Item find(String id) {
-        for (Item item : itemRepositoryList) {
-            if (item.getItemId().equals(id)) {
-                return item;
-            }
-        }
-        return null;
-    }
-
-    public Item get(int i) {
-        if (i >= itemRepositoryList.size()) {
-            return null;
-        }
-        return itemRepositoryList.get(i);
-    }
-
-    public void add(Item item) throws LogicException {
-        if (item != null) {
-            if (find(String.valueOf(item.getItemId())) != null) {
-                throw new LogicException("Item with this ID already exists in repository");
-            }
-            itemRepositoryList.add(item);
+    @Override
+    public void create(Item item) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            entityManager.persist(item);
+            entityManager.getTransaction().commit();
         }
     }
 
-    public void remove(String item) {
-        if (item != null) {
-            itemRepositoryList.removeIf(i -> i.equals(item));
+    @Override
+    public Item get(long id) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            return entityManager.find(Item.class, id);
         }
     }
 
-    public String report() {
-        StringBuilder report = new StringBuilder();
-        for (Item item : itemRepositoryList) {
-            report.append(item.getItemInfo());
+    @Override
+    public void update(Item item) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            entityManager.merge(item);
+            entityManager.getTransaction().commit();
         }
-        return report.toString();
     }
 
-    public int getSize() {
-        return itemRepositoryList.size();
-    }
-
-    public List<Item> getAll() {
-        return new ArrayList<>(itemRepositoryList);
+    @Override
+    public void delete(Item item) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            Item managedItem = entityManager.find(Item.class, item.getItemId());
+            entityManager.remove(managedItem);
+            entityManager.getTransaction().commit();
+        }
     }
 }

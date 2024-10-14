@@ -19,9 +19,9 @@ public class ItemManager {
         itemRepository.create(music);
     }
 
-    public void registerMovie(Long itemId, int basePrice, String itemName, String genre, int minutes, boolean casette)
+    public void registerMovie(Long itemId, int basePrice, String itemName, int minutes, boolean casette)
             throws ItemAvailableException, LogicException {
-        Movie movie = new Movie(itemId, basePrice, itemName, genre, minutes, casette);
+        Movie movie = new Movie(itemId, basePrice, itemName, minutes, casette);
         itemRepository.create(movie);
     }
 
@@ -44,7 +44,41 @@ public class ItemManager {
         itemRepository.delete(item);
     }
 
-    public void updateItem() {
-        //TODO
+    public void updateItem(long id, int basePrice, String itemName,
+                           MusicGenre genre, Boolean vinyl,
+                           Integer minutes, Boolean casette,
+                           Integer pagesNumber) throws ItemNotAvailableException {
+
+        Item item = itemRepository.get(id);
+        if (item == null) {
+            throw new ItemNotAvailableException("Item not found.");
+        }
+
+        item.setBasePrice(basePrice);
+        item.setItemName(itemName);
+
+        if (item instanceof Music) {
+            Music music = (Music) item;
+            if (genre != null) {
+                music.setGenre(genre);
+            }
+            if (vinyl != null) {
+                music.setVinyl(vinyl);
+            }
+        } else if (item instanceof Movie) {
+            Movie movie = (Movie) item;
+            if (minutes != null) {
+                movie.setMinutes(minutes);
+            }
+            if (casette != null) {
+                movie.setCasette(casette);
+            }
+        } else if (item instanceof Comics) {
+            Comics comics = (Comics) item;
+            if (pagesNumber != null) {
+                comics.setPagesNumber(pagesNumber);
+            }
+        }
+        itemRepository.update(item);
     }
 }

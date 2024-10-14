@@ -3,20 +3,22 @@ package models;
 import jakarta.persistence.*;
 
 @Entity
-@DiscriminatorValue("Music")
+@DiscriminatorValue("Music") // Użycie typu dziedziczenia, aby rozróżnić rodzaje Item
 public class Music extends Item {
 
-    @Enumerated(EnumType.STRING) // lub EnumType.ORDINAL, zależnie od tego, jak chcesz przechowywać
+    @Enumerated(EnumType.STRING) // Przechowywanie jako string
     private MusicGenre genre; // Nowe pole enum
 
-    private boolean vinyl;
+    private boolean vinyl; // Informacja, czy to winyl
 
-    public Music(Long itemId, int basePrice, String itemName, MusicGenre genre, boolean vinyl) {
-        super(itemId, basePrice, itemName);
+    // Konstruktor
+    public Music(long itemId, int basePrice, String itemName, MusicGenre genre, boolean vinyl) {
+        super(itemId, basePrice, itemName); // Użycie konstruktora klasy bazowej
         this.genre = genre;
         this.vinyl = vinyl;
     }
 
+    // Domyślny konstruktor
     public Music() {}
 
     @Override
@@ -24,6 +26,7 @@ public class Music extends Item {
         return super.getItemInfo() + ", Genre: " + genre + ", Vinyl: " + (vinyl ? "Yes" : "No");
     }
 
+    // Gettery i settery
     public boolean isVinyl() {
         return vinyl;
     }
@@ -34,5 +37,9 @@ public class Music extends Item {
 
     public void setGenre(MusicGenre genre) {
         this.genre = genre; // Dodaj settera dla genre
+    }
+
+    public void setVinyl(boolean vinyl) {
+        this.vinyl = vinyl;
     }
 }

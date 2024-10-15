@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long personalID;
     @Column(name = "first_name")
     private String firstName;
@@ -14,6 +15,9 @@ public class Client {
     private boolean archive;
     @ManyToOne
     private ClientType clientType;
+
+    @Version
+    private int version;
 
     public Client() {
     }

@@ -10,11 +10,13 @@ public class ClientType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
+    @Column(name = "max_articles")
     protected int maxArticles;
     protected int discount;
     @Column(name = "type_name")
     protected String typeName;
+    @Version
+    private int version;
 
     public ClientType() {
     }

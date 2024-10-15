@@ -1,17 +1,15 @@
 package models;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "comics") // Upewnij się, że nazwa tabeli jest napisana małymi literami
+@DiscriminatorValue("Comics")
 public class Comics extends Item {
 
-    @Column(name = "pages_number")
     private int pagesNumber;
 
-    public Comics(Long itemId, int basePrice, String itemName, int pagesNumber) {
+    public Comics(long itemId, int basePrice, String itemName, int pagesNumber) {
         super(itemId, basePrice, itemName); // Wywołaj konstruktor klasy bazowej
         this.pagesNumber = pagesNumber;
     }

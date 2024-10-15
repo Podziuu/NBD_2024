@@ -11,6 +11,11 @@
       <class>models.DiamondMembership</class>
       <class>models.Membership</class>
       <class>models.NoMembership</class>
+      <class>models.Music</class>
+      <class>models.Movie</class>
+      <class>models.Item</class>
+      <class>models.MusicGenre</class>
+      <class>models.Comics</class>
 
     <properties>
       <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>

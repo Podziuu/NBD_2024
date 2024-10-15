@@ -2,12 +2,14 @@ package models;
 
 import jakarta.persistence.*;
 
-@MappedSuperclass // Oznacza, że ta klasa nie będzie miała własnej tabeli w bazie danych
-public abstract class Item {
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Table(name = "items")
+public class Item {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Generowanie wartości identyfikatora
-    private Long id;
+    private long id;
 
     @Column(name = "base_price") // Nazwa kolumny w bazie danych
     private int basePrice;
@@ -16,25 +18,23 @@ public abstract class Item {
     private String itemName;
     private boolean available;
 
-    public Item(Long itemId, int basePrice, String itemName) {
+    public Item(long itemId, int basePrice, String itemName) {
         this.id = itemId; // Możesz ustawić id, ale często lepiej pozwolić na automatyczne generowanie
         this.basePrice = basePrice;
         this.itemName = itemName;
     }
 
-    // Domyślny konstruktor
     public Item() {}
 
-    // Metoda do uzyskiwania informacji o przedmiocie
     public String getItemInfo() {
         return "ID: " + id + ", Name: " + itemName + ", Base Price: " + basePrice;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 

@@ -4,6 +4,7 @@ package repos;
 import exceptions.LogicException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.Persistence;
 import models.Item;
 
@@ -14,7 +15,7 @@ public class ItemRepository implements Repository<Item> {
     public void create(Item item) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
-            entityManager.persist(item);
+            entityManager.merge(item);
             entityManager.getTransaction().commit();
         }
     }
@@ -22,7 +23,11 @@ public class ItemRepository implements Repository<Item> {
     @Override
     public Item get(long id) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            return entityManager.find(Item.class, id);
+            return entityManager.createQuery("SELECT i FROM Item i WHERE i.id = :id", Item.class)
+                    .setParameter("id", id)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
         }
     }
 

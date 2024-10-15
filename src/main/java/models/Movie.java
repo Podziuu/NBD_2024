@@ -10,8 +10,8 @@ public class Movie extends Item {
 
     private boolean casette;
 
-    public Movie(long itemId, int basePrice, String itemName, int minutes, boolean casette) {
-        super(itemId, basePrice, itemName);
+    public Movie(int basePrice, String itemName, int minutes, boolean casette) {
+        super(basePrice, itemName);
         this.minutes = minutes;
         this.casette = casette;
     }

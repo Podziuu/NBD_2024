@@ -15,9 +15,9 @@ public class ItemRepository implements Repository<Item> {
     public long create(Item item) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
-            entityManager.merge(item);
+            entityManager.persist(item);
             entityManager.getTransaction().commit();
-            return item.getItemId();
+            return item.getId();
         }
     }
 
@@ -45,7 +45,7 @@ public class ItemRepository implements Repository<Item> {
     public void delete(Item item) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
-            Item managedItem = entityManager.find(Item.class, item.getItemId());
+            Item managedItem = entityManager.find(Item.class, item.getId());
             entityManager.remove(managedItem);
             entityManager.getTransaction().commit();
         }

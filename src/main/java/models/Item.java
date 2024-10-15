@@ -8,21 +8,20 @@ import jakarta.persistence.*;
 public class Item {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Generowanie wartości identyfikatora
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "base_price") // Nazwa kolumny w bazie danych
+    @Column(name = "base_price")
     private int basePrice;
 
-    @Column(name = "item_name") // Nazwa kolumny w bazie danych
+    @Column(name = "item_name")
     private String itemName;
     private boolean available;
 
     @Version
     private int version;
 
-    public Item(long itemId, int basePrice, String itemName) {
-        this.id = itemId;
+    public Item(int basePrice, String itemName) {
         this.basePrice = basePrice;
         this.itemName = itemName;
     }
@@ -55,10 +54,6 @@ public class Item {
 
     public void setItemName(String itemName) {
         this.itemName = itemName;
-    }
-
-    public long getItemId() {
-        return id;
     }
 
     public boolean isAvailable() {

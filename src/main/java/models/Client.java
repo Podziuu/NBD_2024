@@ -23,7 +23,6 @@ public class Client {
     }
 
     public Client(String firstName, String lastName, ClientType clientType) {
-//        this.personalID = personalID;
         this.firstName = firstName;
         this.lastName = lastName;
         this.clientType = clientType;

@@ -13,22 +13,20 @@ public class ItemManager {
         this.itemRepository = new ItemRepository();
     }
 
-    public void registerMusic(long itemId, int basePrice, String itemName, MusicGenre genre, boolean vinyl)
+    public long registerMusic(int basePrice, String itemName, MusicGenre genre, boolean vinyl)
             throws ItemAvailableException, LogicException {
-        Music music = new Music(itemId, basePrice, itemName, genre, vinyl);
-        itemRepository.create(music);
+        Music music = new Music(basePrice, itemName, genre, vinyl);
+        return itemRepository.create(music);
     }
 
-    public void registerMovie(long itemId, int basePrice, String itemName, int minutes, boolean casette)
-            throws ItemAvailableException, LogicException {
-        Movie movie = new Movie(itemId, basePrice, itemName, minutes, casette);
-        itemRepository.create(movie);
+    public long registerMovie(int basePrice, String itemName, int minutes, boolean casette) {
+        Movie movie = new Movie(basePrice, itemName, minutes, casette);
+        return itemRepository.create(movie);
     }
 
-    public void registerComics(long itemId, int basePrice, String itemName, int pagesNumber)
-            throws ItemAvailableException, LogicException {
-        Comics comics = new Comics(itemId, basePrice, itemName, pagesNumber);
-        itemRepository.create(comics);
+    public long registerComics(int basePrice, String itemName, int pagesNumber) {
+        Comics comics = new Comics(basePrice, itemName, pagesNumber);
+        return itemRepository.create(comics);
     }
 
     public Item getItem(long itemId) {

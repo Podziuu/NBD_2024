@@ -48,16 +48,13 @@ public class ItemManagerTest {
     void deleteItemTest() throws ItemNotAvailableException, ItemAvailableException, LogicException {
         itemManager.registerMusic(1, 100, "Rock Album", MusicGenre.POP, true);
         Item item = itemManager.getItem(1);
-        itemManager.deleteItem(item);
+        itemManager.deleteItem(1);
         Assertions.assertNull(itemManager.getItem(1));
     }
 
     @Test
     void deleteItemNotAvailableTest() throws ItemAvailableException, LogicException {
-        itemManager.registerMusic(1, 100, "Rock Album", MusicGenre.Classical, true);
-        Item item = itemManager.getItem(1);
-        item.setAvailable(false);
-        Assertions.assertThrows(ItemNotAvailableException.class, () -> itemManager.deleteItem(item));
+        Assertions.assertThrows(ItemNotAvailableException.class, () -> itemManager.deleteItem(512));
     }
 
     @Test

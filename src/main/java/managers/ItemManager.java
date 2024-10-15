@@ -35,11 +35,11 @@ public class ItemManager {
         return itemRepository.get(itemId);
     }
 
-    public void deleteItem(Item itemId) throws ItemNotAvailableException {
-        if (itemRepository.get(itemId.getItemId()) == null) {
+    public void deleteItem(long itemId) throws ItemNotAvailableException {
+        if (itemRepository.get(itemId) == null) {
             throw new ItemNotAvailableException();
         }
-        Item item = itemRepository.get(itemId.getItemId());
+        Item item = itemRepository.get(itemId);
         itemRepository.delete(item);
     }
 

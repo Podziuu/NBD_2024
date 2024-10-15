@@ -18,6 +18,9 @@ public class Item {
     private String itemName;
     private boolean available;
 
+    @Version
+    private int version;
+
     public Item(long itemId, int basePrice, String itemName) {
         this.id = itemId;
         this.basePrice = basePrice;

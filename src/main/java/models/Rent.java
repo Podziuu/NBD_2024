@@ -1,34 +1,99 @@
 package models;
 
+import exceptions.ParameterException;
+import jakarta.persistence.*;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "rents")
 public class Rent {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Column(name = "rent_id")
     private String rentId;
+
+    @Column(name = "begin_time")
     private LocalDateTime beginTime;
+
+    @Column(name = "end_time")
     private LocalDateTime endTime;
+
+    @Column(name = "rent_cost")
     private int rentCost;
+
+    @Column(name = "archive")
     private boolean archive = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
     private Client client;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
     private Item item;
 
-    public Rent(String rentId, LocalDateTime beginTime, Client client, Item item) {
+    public Rent() {}
+
+    public Rent(String rentId, LocalDateTime beginTime, Client client, Item item) throws ParameterException {
+        if (client == null) {
+            throw new ParameterException("Client is null");
+        }
+        if (item == null) {
+            throw new ParameterException("Item is null");
+        }
+        if (rentId == null || rentId.isEmpty()) {
+            throw new ParameterException("Invalid RentID (can't be empty)!");
+        }
+        if (!item.isAvailable()) {
+            throw new ParameterException("Item is already rented!");
+        }
+
         this.rentId = rentId;
-        this.beginTime = beginTime;
+        this.beginTime = (beginTime != null) ? beginTime : LocalDateTime.now();
         this.client = client;
         this.item = item;
+
+        this.item.setAvailable(false);
     }
 
     public void endRent(LocalDateTime endTime) {
-        this.endTime = endTime;
-        // Możesz tu obliczyć rentCost na podstawie czasu wypożyczenia
+        if (this.endTime != null) {
+            return;
+        }
+
+        if (endTime == null || endTime.isBefore(beginTime)) {
+            this.endTime = beginTime;
+        } else {
+            this.endTime = endTime;
+        }
+
+        double cost = item.getActualPrice() * getRentDays();
+        this.rentCost = client.getClientType().applyDiscount((int) Math.round(cost));
+
+        this.item.setAvailable(true);
+    }
+
+    public long getRentDays() {
+        if (endTime == null) {
+            return 0;
+        }
+        Duration duration = Duration.between(beginTime, endTime);
+        long hours = duration.toHours();
+
+        return (hours % 24 == 0) ? hours / 24 : hours / 24 + 1;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public String getRentId() {
         return rentId;
-    }
-
-    public long getRentDays() {
-        return java.time.Duration.between(beginTime, endTime).toDays();
     }
 
     public int getRentCost() {
@@ -61,5 +126,13 @@ public class Rent {
 
     public void setArchive(boolean archive) {
         this.archive = archive;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public void setItem(Item item) {
+        this.item = item;
     }
 }

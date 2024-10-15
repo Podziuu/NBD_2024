@@ -1,69 +1,86 @@
 package repos;
 
 import exceptions.LogicException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Persistence;
 import models.Rent;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RentRepository {
-    private List<Rent> rentRepositoryList;
+public class RentRepository implements Repository<Rent> {
+    EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
 
-    public RentRepository() {
-        rentRepositoryList = new ArrayList<>();
+    @Override
+    public void create(Rent rent) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            entityManager.persist(rent);
+            entityManager.getTransaction().commit();
+        }
     }
 
-    // Znalezienie wynajmu po jego ID
-    public Rent find(String id) {
-        for (Rent rent : rentRepositoryList) {
-            if (rent.getRentId().equals(id)) {
-                return rent;
+    @Override
+    public Rent get(long id) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            return entityManager.createQuery("SELECT r FROM Rent r WHERE r.rentId = :id", Rent.class)
+                    .setParameter("id", id)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void update(Rent rent) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            entityManager.merge(rent);
+            entityManager.getTransaction().commit();
+        }
+    }
+
+    @Override
+    public void delete(Rent rent) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            entityManager.getTransaction().begin();
+            Rent managedRent = entityManager.find(Rent.class, rent.getRentId());
+            if (managedRent != null) {
+                entityManager.remove(managedRent);
             }
-        }
-        return null; // Zwraca null, gdy nie znajdzie wynajmu
-    }
-
-    // Pobranie wynajmu po indeksie
-    public Rent get(int i) {
-        if (i >= rentRepositoryList.size()) {
-            return null; // Zwraca null, gdy indeks wykracza poza listę
-        }
-        return rentRepositoryList.get(i);
-    }
-
-    // Dodanie nowego wynajmu
-    public void add(Rent rent) throws LogicException {
-        if (rent != null) {
-            if (find(rent.getRentId()) != null) {
-                throw new LogicException("Rent with this ID already exists in repository");
-            }
-            rentRepositoryList.add(rent);
+            entityManager.getTransaction().commit();
         }
     }
 
-    // Usunięcie wynajmu
-    public void remove(Rent rent) {
-        if (rent != null) {
-            rentRepositoryList.removeIf(r -> r.equals(rent)); // Usuwa wynajem z listy
+    public List<Rent> getAll() {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            return entityManager.createQuery("SELECT r FROM Rent r", Rent.class)
+                    .getResultList();
         }
     }
 
-    // Generowanie raportu z listy wynajmów
+    public Rent find(String rentId) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            return entityManager.createQuery("SELECT r FROM Rent r WHERE r.rentId = :rentId", Rent.class)
+                    .setParameter("rentId", rentId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
     public String report() {
         StringBuilder report = new StringBuilder();
-        for (Rent rent : rentRepositoryList) {
-            report.append(rent.getRentInfo()); // Dodaje informacje o każdym wynajmie do raportu
+        List<Rent> rents = getAll();
+        for (Rent rent : rents) {
+            report.append(rent.getRentInfo()).append("\n");
         }
         return report.toString();
     }
 
-    // Pobranie liczby wynajmów w repozytorium
     public int getSize() {
-        return rentRepositoryList.size();
-    }
-
-    // Pobranie wszystkich wynajmów w repozytorium
-    public List<Rent> getAll() {
-        return new ArrayList<>(rentRepositoryList); // Zwraca kopię listy wszystkich wynajmów
+        return getAll().size();
     }
 }

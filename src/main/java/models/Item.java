@@ -19,7 +19,7 @@ public class Item {
     private boolean available;
 
     public Item(long itemId, int basePrice, String itemName) {
-        this.id = itemId; // Możesz ustawić id, ale często lepiej pozwolić na automatyczne generowanie
+        this.id = itemId;
         this.basePrice = basePrice;
         this.itemName = itemName;
     }
@@ -27,7 +27,7 @@ public class Item {
     public Item() {}
 
     public String getItemInfo() {
-        return "ID: " + id + ", Name: " + itemName + ", Base Price: " + basePrice;
+        return "ID: " + id + ", Name: " + itemName + ", Base Price: " + basePrice + ", Available: " + available;
     }
 
     public long getId() {
@@ -64,5 +64,9 @@ public class Item {
 
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+
+    public double getActualPrice() {
+        return this.getBasePrice();
     }
 }

@@ -52,6 +52,14 @@ public class RentRepository implements Repository<Rent> {
         }
     }
 
+    public List<Rent> getActiveRentsByClient(Client client) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            return entityManager.createQuery("SELECT r FROM Rent r WHERE r.client = :client AND r.endTime IS NULL", Rent.class)
+                    .setParameter("client", client)
+                    .getResultList();
+        }
+    }
+
     public List<Rent> getAll() {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             return entityManager.createQuery("SELECT r FROM Rent r", Rent.class)

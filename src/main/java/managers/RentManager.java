@@ -1,6 +1,5 @@
 package managers;
 
-import exceptions.LogicException;
 import exceptions.ParameterException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -11,16 +10,17 @@ import repos.RentRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public class RentManager {
 
     private EntityManagerFactory entityManagerFactory;
     private RentRepository rentRepository;
+    private ClientTypeManager clientTypeManager;
 
     public RentManager() {
         this.entityManagerFactory = Persistence.createEntityManagerFactory("default");
         this.rentRepository = new RentRepository();
+        this.clientTypeManager = new ClientTypeManager();
     }
     
     public Rent rentItem(LocalDateTime beginTime, Client client, Item item) throws ParameterException {
@@ -57,90 +57,19 @@ public class RentManager {
     }
 
     public List<Rent> getAllClientRents(Client client) {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        List<Rent> clientRents;
-
-        try {
-            clientRents = entityManager.createQuery("SELECT r FROM Rent r WHERE r.client = :client", Rent.class)
-                    .setParameter("client", client)
-                    .getResultList();
-        } finally {
-            entityManager.close();
-        }
-
-        return clientRents;
+       return rentRepository.getActiveRentsByClient(client);
     }
 
-    public List<Rent> getAll() {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        List<Rent> rents;
-
-        try {
-            rents = entityManager.createQuery("SELECT r FROM Rent r", Rent.class).getResultList();
-        } finally {
-            entityManager.close();
-        }
-
-        return rents;
-    }
-
-    public Optional<Rent> find(String rentId) {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        Optional<Rent> rent;
-
-        try {
-            rent = Optional.ofNullable(entityManager.createQuery("SELECT r FROM Rent r WHERE r.id = :rentId", Rent.class)
-                    .setParameter("rentId", rentId)
-                    .getSingleResult());
-        } catch (Exception e) {
-            rent = Optional.empty();
-        } finally {
-            entityManager.close();
-        }
-
-        return rent;
-    }
-
-    public String report() {
-        StringBuilder report = new StringBuilder();
-        List<Rent> rents = getAll();
-
-        for (Rent rent : rents) {
-            report.append(rent.getRentInfo()).append("\n");
-        }
-
-        return report.toString();
-    }
-
-    public List<Rent> getAllArchiveRents() {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        List<Rent> archivedRents;
-
-        try {
-            archivedRents = entityManager.createQuery("SELECT r FROM Rent r WHERE r.archive = true", Rent.class)
-                    .getResultList();
-        } finally {
-            entityManager.close();
-        }
-
-        return archivedRents;
+    public Rent getRent(long rentId) {
+        return rentRepository.get(rentId);
     }
 
     private int getMaxRentalsForClient(ClientType clientType) {
-        if (clientType instanceof DiamondMembership) {
-            return Integer.MAX_VALUE; // Bez limitu dla DiamondMembership
-        } else if (clientType instanceof Membership) {
-            return 5; // Limit dla zwykłego Membership
-        } else if (clientType instanceof NoMembership) {
-            return 2; // Limit dla NoMembership
-        }
-        return 0; // Domyślnie brak możliwości wypożyczania
+        return clientType.getMaxArticles();
     }
 
     public long countActiveRentsByClient(Client client, EntityManager entityManager) {
         String query = "SELECT COUNT(r) FROM Rent r WHERE r.client = :client AND r.endTime IS NULL";
-
-        entityManager.lock(client, LockModeType.PESSIMISTIC_WRITE);
 
         return entityManager.createQuery(query, Long.class)
                 .setParameter("client", client)

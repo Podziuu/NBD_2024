@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Persistence;
 import models.Rent;
+import models.Client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,22 +15,19 @@ public class RentRepository implements Repository<Rent> {
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
 
     @Override
-    public void create(Rent rent) {
+    public long create(Rent rent) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
             entityManager.persist(rent);
             entityManager.getTransaction().commit();
+            return rent.getId();
         }
     }
 
     @Override
     public Rent get(long id) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            return entityManager.createQuery("SELECT r FROM Rent r WHERE r.rentId = :id", Rent.class)
-                    .setParameter("id", id)
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            return null;
+            return entityManager.find(Rent.class, id);
         }
     }
 
@@ -46,7 +44,7 @@ public class RentRepository implements Repository<Rent> {
     public void delete(Rent rent) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
-            Rent managedRent = entityManager.find(Rent.class, rent.getRentId());
+            Rent managedRent = entityManager.find(Rent.class, rent.getId());
             if (managedRent != null) {
                 entityManager.remove(managedRent);
             }
@@ -61,16 +59,6 @@ public class RentRepository implements Repository<Rent> {
         }
     }
 
-    public Rent find(String rentId) {
-        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            return entityManager.createQuery("SELECT r FROM Rent r WHERE r.rentId = :rentId", Rent.class)
-                    .setParameter("rentId", rentId)
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
-    }
-
     public String report() {
         StringBuilder report = new StringBuilder();
         List<Rent> rents = getAll();
@@ -82,5 +70,14 @@ public class RentRepository implements Repository<Rent> {
 
     public int getSize() {
         return getAll().size();
+    }
+
+    public long countActiveRentsByClient(Client client) {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            String query = "SELECT COUNT(r) FROM Rent r WHERE r.client = :client AND r.endTime IS NULL";
+            return entityManager.createQuery(query, Long.class)
+                    .setParameter("client", client)
+                    .getSingleResult();
+        }
     }
 }

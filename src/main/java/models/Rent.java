@@ -14,9 +14,6 @@ public class Rent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "rent_id")
-    private String rentId;
-
     @Column(name = "begin_time")
     private LocalDateTime beginTime;
 
@@ -39,25 +36,10 @@ public class Rent {
 
     public Rent() {}
 
-    public Rent(String rentId, LocalDateTime beginTime, Client client, Item item) throws ParameterException {
-        if (client == null) {
-            throw new ParameterException("Client is null");
-        }
-        if (item == null) {
-            throw new ParameterException("Item is null");
-        }
-        if (rentId == null || rentId.isEmpty()) {
-            throw new ParameterException("Invalid RentID (can't be empty)!");
-        }
-        if (!item.isAvailable()) {
-            throw new ParameterException("Item is already rented!");
-        }
-
-        this.rentId = rentId;
+    public Rent(LocalDateTime beginTime, Client client, Item item) throws ParameterException {
         this.beginTime = (beginTime != null) ? beginTime : LocalDateTime.now();
         this.client = client;
         this.item = item;
-
         this.item.setAvailable(false);
     }
 
@@ -92,10 +74,6 @@ public class Rent {
         return id;
     }
 
-    public String getRentId() {
-        return rentId;
-    }
-
     public int getRentCost() {
         return rentCost;
     }
@@ -109,7 +87,7 @@ public class Rent {
     }
 
     public String getRentInfo() {
-        return "Rent ID: " + rentId + ", Client: " + client.getFirstName() + ", Item: " + item.getItemName();
+        return "Rent ID: " + id + ", Client: " + client.getFirstName() + ", Item: " + item.getItemName();
     }
 
     public LocalDateTime getBeginTime() {

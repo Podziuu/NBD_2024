@@ -4,10 +4,10 @@ import exceptions.LogicException;
 import exceptions.ParameterException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.Persistence;
-import models.Client;
-import models.Item;
-import models.Rent;
+import models.*;
+import repos.RentRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,53 +16,44 @@ import java.util.Optional;
 public class RentManager {
 
     private EntityManagerFactory entityManagerFactory;
+    private RentRepository rentRepository;
 
     public RentManager() {
         this.entityManagerFactory = Persistence.createEntityManagerFactory("default");
+        this.rentRepository = new RentRepository();
     }
-
-    public Rent rentItem(String rentId, LocalDateTime beginTime, Client client, Item item) {
-        Rent rent = null;
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-
-        try {
+    
+    public Rent rentItem(LocalDateTime beginTime, Client client, Item item) throws ParameterException {
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
 
-            rent = new Rent(rentId, beginTime, client, item);
-            entityManager.persist(rent);
+            Client managedClient = entityManager.find(Client.class, client.getPersonalId(), LockModeType.PESSIMISTIC_WRITE);
+
+            int maxRentals = getMaxRentalsForClient(managedClient.getClientType());
+            long activeRents = countActiveRentsByClient(managedClient, entityManager);
+
+            if (activeRents >= maxRentals) {
+                throw new ParameterException("Client has reached the maximum number of active rentals!");
+            }
+
+            Item managedItem = entityManager.find(Item.class, item.getId(), LockModeType.PESSIMISTIC_WRITE);
+
+            if (!managedItem.isAvailable()) {
+                throw new ParameterException("Item is already rented!");
+            }
+
+            Rent rent = new Rent(beginTime, managedClient, managedItem);
+            rentRepository.create(rent);
 
             entityManager.getTransaction().commit();
-        } catch (ParameterException e) {
-            entityManager.getTransaction().rollback();
-            throw new RuntimeException("Error renting item: " + e.getMessage(), e);
-        } finally {
-            entityManager.close();
+            return rent;
         }
-
-        return rent;
     }
 
-    public void returnItem(Item item) {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        try {
-            entityManager.getTransaction().begin();
-
-            Rent rent = entityManager.createQuery("SELECT r FROM Rent r WHERE r.item = :item AND r.endTime IS NULL", Rent.class)
-                    .setParameter("item", item)
-                    .getSingleResult();
-
-            rent.endRent(LocalDateTime.now());
-            rent.setArchive(true);
-
-            entityManager.merge(rent);
-
-            entityManager.getTransaction().commit();
-        } catch (Exception e) {
-            entityManager.getTransaction().rollback();
-            throw new RuntimeException("Error returning item: " + e.getMessage(), e);
-        } finally {
-            entityManager.close();
-        }
+    public void endRent(long rentId, LocalDateTime endTime) {
+        Rent rent = rentRepository.get(rentId);
+        rent.endRent(endTime);
+        rentRepository.update(rent);
     }
 
     public List<Rent> getAllClientRents(Client client) {
@@ -98,7 +89,7 @@ public class RentManager {
         Optional<Rent> rent;
 
         try {
-            rent = Optional.ofNullable(entityManager.createQuery("SELECT r FROM Rent r WHERE r.rentId = :rentId", Rent.class)
+            rent = Optional.ofNullable(entityManager.createQuery("SELECT r FROM Rent r WHERE r.id = :rentId", Rent.class)
                     .setParameter("rentId", rentId)
                     .getSingleResult());
         } catch (Exception e) {
@@ -133,5 +124,26 @@ public class RentManager {
         }
 
         return archivedRents;
+    }
+
+    private int getMaxRentalsForClient(ClientType clientType) {
+        if (clientType instanceof DiamondMembership) {
+            return Integer.MAX_VALUE; // Bez limitu dla DiamondMembership
+        } else if (clientType instanceof Membership) {
+            return 5; // Limit dla zwykłego Membership
+        } else if (clientType instanceof NoMembership) {
+            return 2; // Limit dla NoMembership
+        }
+        return 0; // Domyślnie brak możliwości wypożyczania
+    }
+
+    public long countActiveRentsByClient(Client client, EntityManager entityManager) {
+        String query = "SELECT COUNT(r) FROM Rent r WHERE r.client = :client AND r.endTime IS NULL";
+
+        entityManager.lock(client, LockModeType.PESSIMISTIC_WRITE);
+
+        return entityManager.createQuery(query, Long.class)
+                .setParameter("client", client)
+                .getSingleResult();
     }
 }

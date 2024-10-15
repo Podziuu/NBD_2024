@@ -19,8 +19,8 @@ public class ClientManagerTest {
 
     @Test
     void createClientTest() {
-        clientManager.createClient("John", "Kowalski", "DiamondMembership");
-        Assertions.assertNotNull(clientManager.getClient(1));
+        long id = clientManager.createClient("John", "Kowalski", "DiamondMembership");
+        Assertions.assertNotNull(clientManager.getClient(id));
     }
 
     @Test
@@ -30,9 +30,9 @@ public class ClientManagerTest {
 
     @Test
     void deleteClientTest() throws ClientNotExistsException {
-        clientManager.createClient("Robert", "Nowak", "Membership");
-        clientManager.deleteClient(1);
-        Assertions.assertNull(clientManager.getClient(1));
+        long id = clientManager.createClient("Robert", "Nowak", "Membership");
+        clientManager.deleteClient(id);
+        Assertions.assertNull(clientManager.getClient(id));
     }
 
     @Test
@@ -42,9 +42,9 @@ public class ClientManagerTest {
 
     @Test
     void updateClient() throws ClientNotExistsException {
-        clientManager.createClient("Robert", "Nowak", "Membership");
-        clientManager.updateClient(1, "Robert", "Kowalski", "DiamondMembership");
-        Client client = clientManager.getClient(1);
+        long id = clientManager.createClient("Robert", "Nowak", "Membership");
+        clientManager.updateClient(id, "Robert", "Kowalski", "DiamondMembership");
+        Client client = clientManager.getClient(id);
         Assertions.assertEquals("Robert", client.getFirstName());
         Assertions.assertEquals("Kowalski", client.getLastName());
         Assertions.assertEquals("Diamond Membership: 15 articles, discount: 30%", client.getClientType().getClientTypeInfo());
@@ -57,9 +57,9 @@ public class ClientManagerTest {
 
     @Test
     void archiveClientTest() throws ClientNotExistsException {
-        clientManager.createClient("Robert", "Nowak", "Membership");
-        clientManager.archiveClient(1);
-        Assertions.assertTrue(clientManager.getClient(1).isArchive());
+        long id = clientManager.createClient("Robert", "Nowak", "Membership");
+        clientManager.archiveClient(id);
+        Assertions.assertTrue(clientManager.getClient(id).isArchive());
     }
 
     @Test
@@ -69,10 +69,10 @@ public class ClientManagerTest {
 
     @Test
     void unarchiveClientTest() throws ClientNotExistsException {
-        clientManager.createClient("Robert", "Nowak", "Membership");
-        clientManager.archiveClient(1);
-        clientManager.unarchiveClient(1);
-        Assertions.assertFalse(clientManager.getClient(1).isArchive());
+        long id = clientManager.createClient("Robert", "Nowak", "Membership");
+        clientManager.archiveClient(id);
+        clientManager.unarchiveClient(id);
+        Assertions.assertFalse(clientManager.getClient(id).isArchive());
     }
 
     @Test

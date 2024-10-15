@@ -12,11 +12,12 @@ public class ItemRepository implements Repository<Item> {
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default" );
 
     @Override
-    public void create(Item item) {
+    public long create(Item item) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
             entityManager.merge(item);
             entityManager.getTransaction().commit();
+            return item.getItemId();
         }
     }
 

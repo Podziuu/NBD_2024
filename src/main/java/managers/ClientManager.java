@@ -17,9 +17,9 @@ public class ClientManager {
         this.clientTypeManager = new ClientTypeManager();
     }
 
-    public void createClient(String firstName, String lastName, String clientType) {
+    public long createClient(String firstName, String lastName, String clientType) {
         ClientType type = clientTypeManager.getClientTypeByType(clientType);
-        clientRepository.create(new Client(firstName, lastName, type));
+        return clientRepository.create(new Client(firstName, lastName, type));
     }
 
     public Client getClient(long id) {

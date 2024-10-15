@@ -7,11 +7,12 @@ public class ClientTypeRepository implements Repository<ClientType> {
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
 
     @Override
-    public void create(ClientType clientType) {
+    public long create(ClientType clientType) {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
             entityManager.getTransaction().begin();
             entityManager.persist(clientType);
             entityManager.getTransaction().commit();
+            return clientType.getId();
         }
     }
 

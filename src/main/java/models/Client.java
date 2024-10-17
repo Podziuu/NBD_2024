@@ -2,6 +2,8 @@ package models;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 public class Client {
     @Id
@@ -66,5 +68,19 @@ public class Client {
 
     public boolean isArchive() {
         return archive;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Client)) return false;
+        Client client = (Client) o;
+        return Objects.equals(personalID, client.personalID);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(personalID);
     }
 }

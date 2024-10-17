@@ -22,13 +22,13 @@ public class RentManager {
         this.rentRepository = new RentRepository();
         this.clientTypeManager = new ClientTypeManager();
     }
-    
+
     public Rent rentItem(LocalDateTime beginTime, Client client, Item item) throws ParameterException {
-        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            entityManager.getTransaction().begin();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
 
-            Client managedClient = entityManager.find(Client.class, client.getPersonalId(), LockModeType.PESSIMISTIC_WRITE);
-
+        try {
+            Client managedClient = entityManager.find(Client.class, client.getPersonalId(), LockModeType.OPTIMISTIC);
             int maxRentals = getMaxRentalsForClient(managedClient.getClientType());
             long activeRents = countActiveRentsByClient(managedClient, entityManager);
 
@@ -36,7 +36,7 @@ public class RentManager {
                 throw new ParameterException("Client has reached the maximum number of active rentals!");
             }
 
-            Item managedItem = entityManager.find(Item.class, item.getId(), LockModeType.PESSIMISTIC_WRITE);
+            Item managedItem = entityManager.find(Item.class, item.getId(), LockModeType.OPTIMISTIC);
 
             if (!managedItem.isAvailable()) {
                 throw new ParameterException("Item is already rented!");
@@ -45,16 +45,44 @@ public class RentManager {
             Rent rent = new Rent(beginTime, managedClient, managedItem);
             rentRepository.create(rent);
 
+            managedItem.setAvailable(false);
+            entityManager.merge(managedItem);
+
             entityManager.getTransaction().commit();
             return rent;
+        } catch (Exception e) {
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            throw e;
+        } finally {
+            entityManager.close();
         }
     }
 
     public void endRent(long rentId, LocalDateTime endTime) {
-        Rent rent = rentRepository.get(rentId);
-        rent.endRent(endTime);
-        rentRepository.update(rent);
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        try {
+            entityManager.getTransaction().begin();
+
+            Rent rent = entityManager.find(Rent.class, rentId);
+            rent.endRent(endTime);
+
+            Item item = rent.getItem();
+            item.setAvailable(true);
+            entityManager.merge(item);
+
+            entityManager.getTransaction().commit();
+        } catch (Exception e) {
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            throw e;
+        } finally {
+            entityManager.close();
+        }
     }
+
 
     public List<Rent> getAllClientRents(Client client) {
        return rentRepository.getActiveRentsByClient(client);

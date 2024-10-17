@@ -2,8 +2,10 @@ package models;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "items")
 public class Item {
 
@@ -24,6 +26,7 @@ public class Item {
     public Item(int basePrice, String itemName) {
         this.basePrice = basePrice;
         this.itemName = itemName;
+        this.available = true;
     }
 
     public Item() {}
@@ -66,5 +69,19 @@ public class Item {
 
     public double getActualPrice() {
         return this.getBasePrice();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Item)) return false;
+        Item item = (Item) o;
+        return id == item.id;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

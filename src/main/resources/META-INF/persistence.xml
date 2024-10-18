@@ -16,6 +16,7 @@
       <class>models.Item</class>
       <class>models.MusicGenre</class>
       <class>models.Comics</class>
+      <class>models.Rent</class>
 
     <properties>
       <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>

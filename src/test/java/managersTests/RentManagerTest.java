@@ -3,92 +3,57 @@ package managersTests;
 import exceptions.ItemAvailableException;
 import exceptions.LogicException;
 import exceptions.ParameterException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.Persistence;
 import managers.ClientManager;
 import managers.ClientTypeManager;
 import managers.ItemManager;
 import managers.RentManager;
 import models.*;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
 public class RentManagerTest {
-    private static EntityManagerFactory entityManagerFactory;
-    private EntityManager entityManager;
     private RentManager rentManager;
     private ItemManager itemManager;
     private ClientManager clientManager;
 
-
-    @BeforeAll
-    static void setUpFactory() {
-        entityManagerFactory = Persistence.createEntityManagerFactory("default");
-    }
-
     @BeforeEach
     void setUp() {
-        entityManager = entityManagerFactory.createEntityManager();
-
         rentManager = new RentManager();
         clientManager = new ClientManager();
         itemManager = new ItemManager();
-
-
         ClientTypeManager clientTypeManager = new ClientTypeManager();
         clientTypeManager.createBasicClientTypes();
-
-        clearDatabase();
-    }
-
-    private void clearDatabase() {
-        try (EntityManager em = entityManagerFactory.createEntityManager()) {
-            EntityTransaction transaction = em.getTransaction();
-            transaction.begin();
-            try {
-                System.out.println("Clearing Rent, Item, and Client tables.");
-                em.createQuery("DELETE FROM Rent").executeUpdate();
-                em.createQuery("DELETE FROM Item").executeUpdate();
-                em.createQuery("DELETE FROM Client").executeUpdate();
-                transaction.commit();
-                System.out.println("Tables cleared successfully.");
-            } catch (Exception e) {
-                System.err.println("Error clearing database: " + e.getMessage());
-                if (transaction.isActive()) {
-                    transaction.rollback();
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error creating EntityManager: " + e.getMessage());
-        }
-    }
-
-    @AfterEach
-    void tearDown() {
-        if (entityManager.getTransaction().isActive()) {
-            entityManager.getTransaction().rollback();
-        }
-
-        entityManager.close();
-    }
-
-    @AfterAll
-    static void closeFactory() {
-        if (entityManagerFactory != null) {
-            entityManagerFactory.close();
-        }
     }
 
     @Test
+    public void testItemNotAvailableForRent() throws ParameterException, ItemAvailableException, LogicException {
+        System.out.println("Starting test: testItemNotAvailableForRent");
+
+        long idb = clientManager.createClient("Robercik", "Doe", "DiamondMembership");
+        Client client = clientManager.getClient(idb);
+
+        long idc = itemManager.registerMusic(150, "Pop Album", MusicGenre.POP, false);
+        Item item = itemManager.getItem(idc);
+
+        LocalDateTime beginTime = LocalDateTime.now();
+        System.out.println("Renting item for the first time.");
+        rentManager.rentItem(beginTime, client, item);
+
+        System.out.println("Attempting to rent the same item again.");
+        Assertions.assertThrows(ParameterException.class, () -> {
+            rentManager.rentItem(beginTime, client, item);
+        }, "Item should not be available after being rented.");
+
+        System.out.println("Test finished: testItemNotAvailableForRent");
+    }
+
+
+    @Test
     public void testAddRent() throws ParameterException, ItemAvailableException, LogicException {
+        System.out.println("TEST");
         long idC = clientManager.createClient("John", "Kowalski", "DiamondMembership");
         Client client = clientManager.getClient(idC);
 
@@ -105,23 +70,37 @@ public class RentManagerTest {
         Assertions.assertEquals(client, rent.getClient());
         Assertions.assertEquals(item, rent.getItem());
 
-        Item rentedItem = entityManager.find(Item.class, idI);
+        Item rentedItem = itemManager.getItem(idI);
         Assertions.assertFalse(rentedItem.isAvailable(), "Item should not be available after renting.");
     }
 
     @Test
     public void testMaxRentalsExceeded() throws ParameterException, ItemAvailableException, LogicException {
-        long idCa = clientManager.createClient("John", "Kowalski", "DiamondMembership");
+        long idCa = clientManager.createClient("John", "Kowalski", "NoMembership");
         Client client = clientManager.getClient(idCa);
 
         long idI = itemManager.registerMusic(100, "Jazz Album", MusicGenre.Jazz, true);
         Item item = itemManager.getItem(idI);
+        long idI2 = itemManager.registerMusic(100, "Jazz Album", MusicGenre.Jazz, true);
+        Item item2 = itemManager.getItem(idI2);
+        long idI3 = itemManager.registerMusic(100, "Jazz Album", MusicGenre.Jazz, true);
+        Item item3 = itemManager.getItem(idI3);
+        long idI4 = itemManager.registerMusic(100, "Jazz Album", MusicGenre.Jazz, true);
+        Item item4 = itemManager.getItem(idI4);
+        long idI5 = itemManager.registerMusic(100, "Jazz Album", MusicGenre.Jazz, true);
+        Item item5 = itemManager.getItem(idI5);
+        long idI6 = itemManager.registerMusic(100, "Jazz Album", MusicGenre.Jazz, true);
+        Item item6 = itemManager.getItem(idI6);
 
         LocalDateTime beginTime = LocalDateTime.now();
         rentManager.rentItem(beginTime, client, item);
+        rentManager.rentItem(beginTime, client, item2);
+        rentManager.rentItem(beginTime, client, item3);
+        rentManager.rentItem(beginTime, client, item4);
+        rentManager.rentItem(beginTime, client, item5);
 
         Assertions.assertThrows(ParameterException.class, () -> {
-            rentManager.rentItem(beginTime, client, item);
+            rentManager.rentItem(beginTime, client, item6);
         }, "Client should not be able to rent more than the maximum number of rentals.");
     }
 
@@ -141,23 +120,7 @@ public class RentManagerTest {
         LocalDateTime endTime = LocalDateTime.now().plusDays(1);
         rentManager.endRent(rent.getId(), endTime);
 
-        Item rentedItem = entityManager.find(Item.class, ide);
+        Item rentedItem = itemManager.getItem(ide);
         Assertions.assertTrue(rentedItem.isAvailable(), "Item should be available after rent ends.");
-    }
-
-    @Test
-    public void testItemNotAvailableForRent() throws ParameterException, ItemAvailableException, LogicException {
-        long idb = clientManager.createClient("John", "Kowalski", "DiamondMembership");
-        Client client = clientManager.getClient(idb);
-
-        long idc = itemManager.registerMusic(100, "Rock Album", MusicGenre.POP, true);
-        Item item = itemManager.getItem(idc);
-
-        LocalDateTime beginTime = LocalDateTime.now();
-        rentManager.rentItem(beginTime, client, item);
-
-        Assertions.assertThrows(ParameterException.class, () -> {
-            rentManager.rentItem(beginTime, client, item);
-        }, "Item should not be available after being rented.");
     }
 }

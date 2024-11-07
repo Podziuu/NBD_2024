@@ -1,13 +1,29 @@
 package models;
 
+import org.bson.codecs.pojo.annotations.BsonCreator;
+import org.bson.codecs.pojo.annotations.BsonDiscriminator;
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
+import org.bson.types.ObjectId;
+
 public class Client {
-    private String personalID;
+    private ObjectId id;
+    @BsonProperty("personal_id")
+    private long personalID;
+    @BsonProperty("first_name")
     private String firstName;
+    @BsonProperty("last_name")
     private String lastName;
+    @BsonProperty("archive")
     private boolean archive;
+    @BsonProperty("client_type")
     private ClientType clientType;
 
-    public Client(String personalID, String firstName, String lastName, ClientType clientType) {
+    @BsonCreator
+    public Client(@BsonProperty("personal_id") long personalID,
+                  @BsonProperty("first_name") String firstName,
+                  @BsonProperty("last_name") String lastName,
+                  @BsonProperty("client_type") ClientType clientType) {
         this.personalID = personalID;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -18,7 +34,7 @@ public class Client {
         return "Klient: \n Imię: " + firstName + "\n Nazwisko: " + lastName + "\n Pesel: " + personalID;
     }
 
-    public String getPersonalId() {
+    public long getPersonalId() {
         return personalID;
     }
 

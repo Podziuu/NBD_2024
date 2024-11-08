@@ -16,10 +16,10 @@ import java.util.List;
 
 public abstract class AbstractMongoEntity implements AutoCloseable  {
     private ConnectionString connectionString = new ConnectionString(
-            "mongodb://mongodb1:27017,mongodb2:27017,mongodb3:27017/?replicaSet=replica_set_single");
+            "mongodb://mongodb1:27017,mongodb2:27018,mongodb3:27019/?replicaSet=replica_set_single");
     private MongoCredential credential = MongoCredential.createCredential(
             "admin",
-            "mediastore",
+            "admin",
             "adminpassword".toCharArray()
     );
 
@@ -31,7 +31,7 @@ public abstract class AbstractMongoEntity implements AutoCloseable  {
     );
 
     protected MongoClient mongoClient;
-    private MongoDatabase database;
+    protected MongoDatabase database;
 
     protected void initDbConnection() {
         MongoClientSettings settings = MongoClientSettings.builder()

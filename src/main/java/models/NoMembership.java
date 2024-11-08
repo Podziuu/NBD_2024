@@ -1,5 +1,8 @@
 package models;
 
+import org.bson.codecs.pojo.annotations.BsonDiscriminator;
+
+@BsonDiscriminator("NoMembership")
 public class NoMembership extends ClientType {
 
     public NoMembership() {

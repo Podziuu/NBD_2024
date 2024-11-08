@@ -1,9 +1,6 @@
 package models;
 
-import org.bson.codecs.pojo.annotations.BsonCreator;
-import org.bson.codecs.pojo.annotations.BsonDiscriminator;
-import org.bson.codecs.pojo.annotations.BsonId;
-import org.bson.codecs.pojo.annotations.BsonProperty;
+import org.bson.codecs.pojo.annotations.*;
 import org.bson.types.ObjectId;
 
 public class Client {
@@ -30,6 +27,7 @@ public class Client {
         this.clientType = clientType;
     }
 
+    @BsonIgnore
     public String getInfo() {
         return "Klient: \n Imię: " + firstName + "\n Nazwisko: " + lastName + "\n Pesel: " + personalID;
     }

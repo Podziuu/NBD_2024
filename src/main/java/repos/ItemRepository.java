@@ -1,69 +1,56 @@
 package repos;
 
-import exceptions.LogicException;
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import config.AbstractMongoEntity;
+import config.MongoEntity;
 import models.Item;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ItemRepository extends MongoEntity {
 
-public class ItemRepository {
-    private List<Item> itemRepositoryList;
+    @Override
+    public void close() throws Exception {
+
+    }
 
     public ItemRepository() {
-        itemRepositoryList = new ArrayList<>();
+        this.initDbConnection();
     }
 
-    // Znalezienie itemu po jego ID
-    public Item find(String id) {
-        for (Item item : itemRepositoryList) {
-            if (item.getItemId().equals(id)) {
-                return item;
-            }
-        }
-        return null; // Zwraca null, gdy nie znajdzie itemu
+    public void create(Item item) {
+        MongoCollection<Item> collection = getDatabase().getCollection("items", Item.class);
+        collection.insertOne(item);
     }
 
-    // Pobranie itemu po indeksie
-    public Item get(int i) {
-        if (i >= itemRepositoryList.size()) {
-            return null; // Zwraca null, gdy indeks wykracza poza listę
-        }
-        return itemRepositoryList.get(i);
+    public MongoCollection<Item> getItems() {
+        return getDatabase().getCollection("items", Item.class);
     }
 
-    // Dodanie nowego itemu
-    public void add(Item item) throws LogicException {
-        if (item != null) {
-            if (find(item.getItemId()) != null) {
-                throw new LogicException("Item with this ID already exists in repository");
-            }
-            itemRepositoryList.add(item);
-        }
+    public Item read(long id) {
+        MongoCollection<Item> collection = getDatabase().getCollection("items", Item.class);
+        Item item = collection.find(Filters.eq("_id", id)).first();
+        return item;
     }
 
-    // Usunięcie itemu
-    public void remove(Item item) {
-        if (item != null) {
-            itemRepositoryList.removeIf(i -> i.equals(item)); // Usuwa item z listy
-        }
+    public void update(Item item) {
+        MongoCollection<Item> collection = getDatabase().getCollection("items", Item.class);
+        BasicDBObject object = new BasicDBObject();
+        object.put("_id", item.getItemId());
+        collection.updateOne(object,
+                Updates.combine(
+                        Updates.set("base_price", item.getBasePrice()),
+                        Updates.set("item_name", item.getItemName()),
+                        Updates.set("available", item.isAvailable())
+                )
+        );
     }
 
-    // Generowanie raportu z listy itemów
-    public String report() {
-        StringBuilder report = new StringBuilder();
-        for (Item item : itemRepositoryList) {
-            report.append(item.getItemInfo()); // Dodaje informacje o każdym itemie do raportu
-        }
-        return report.toString();
-    }
-
-    // Pobranie liczby itemów w repozytorium
-    public int getSize() {
-        return itemRepositoryList.size();
-    }
-
-    // Pobranie wszystkich itemów w repozytorium
-    public List<Item> getAll() {
-        return new ArrayList<>(itemRepositoryList); // Zwraca kopię listy wszystkich itemów
+    public void delete(long id) {
+        MongoCollection<Item> collection = getDatabase().getCollection("items", Item.class);
+        BasicDBObject object = new BasicDBObject();
+        object.put("_id", id);
+        collection.deleteOne(object);
     }
 }

@@ -5,22 +5,22 @@ import org.bson.types.ObjectId;
 
 public class Client {
     private ObjectId id;
-    @BsonProperty("personal_id")
+    @BsonProperty("personalId")
     private long personalID;
-    @BsonProperty("first_name")
+    @BsonProperty("firstName")
     private String firstName;
-    @BsonProperty("last_name")
+    @BsonProperty("lastName")
     private String lastName;
     @BsonProperty("archive")
     private boolean archive;
-    @BsonProperty("client_type")
+    @BsonProperty("clientType")
     private ClientType clientType;
 
     @BsonCreator
-    public Client(@BsonProperty("personal_id") long personalID,
-                  @BsonProperty("first_name") String firstName,
-                  @BsonProperty("last_name") String lastName,
-                  @BsonProperty("client_type") ClientType clientType) {
+    public Client(@BsonProperty("personalId") long personalID,
+                  @BsonProperty("firstName") String firstName,
+                  @BsonProperty("lastName") String lastName,
+                  @BsonProperty("clientType") ClientType clientType) {
         this.personalID = personalID;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -30,6 +30,10 @@ public class Client {
     @BsonIgnore
     public String getInfo() {
         return "Klient: \n Imię: " + firstName + "\n Nazwisko: " + lastName + "\n Pesel: " + personalID;
+    }
+
+    public ObjectId getId() {
+        return id;
     }
 
     public long getPersonalId() {

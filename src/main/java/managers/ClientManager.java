@@ -16,9 +16,9 @@ public class ClientManager {
         this.clientRepository = clientRepository;
     }
 
-    public void addClient(String firstName, String lastName, long personalID, String clientType) {
+    public ObjectId addClient(String firstName, String lastName, long personalID, String clientType) {
         ClientType type = getClientType(clientType);
-        clientRepository.addClient(new Client(personalID, firstName, lastName, type));
+        return clientRepository.addClient(new Client(personalID, firstName, lastName, type));
     }
 
     public Client getClient(ObjectId id) {
@@ -26,24 +26,37 @@ public class ClientManager {
     }
 
     public void updateClient(ObjectId id, String firstName, String lastName, String clientType) {
+        if (clientRepository.getClient(id) == null) {
+            throw new NullPointerException("Client not found");
+        }
         Client client = clientRepository.getClient(id);
         client.setFirstName(firstName);
         client.setLastName(lastName);
         client.setClientType(getClientType(clientType));
+        System.out.println(client.getInfo());
         clientRepository.updateClient(client);
     }
 
     public void removeClient(ObjectId id) {
+        if (clientRepository.getClient(id) == null) {
+            throw new NullPointerException("Client not found");
+        }
         clientRepository.removeClient(id);
     }
 
     public void archiveClient(ObjectId id) {
+        if (clientRepository.getClient(id) == null) {
+            throw new NullPointerException("Client not found");
+        }
         Client client = clientRepository.getClient(id);
         client.setArchive(true);
         clientRepository.updateClient(client);
     }
 
     public void unarchiveClient(ObjectId id) {
+        if (clientRepository.getClient(id) == null) {
+            throw new NullPointerException("Client not found");
+        }
         Client client = clientRepository.getClient(id);
         client.setArchive(false);
         clientRepository.updateClient(client);

@@ -5,7 +5,7 @@ import org.bson.codecs.pojo.annotations.BsonDiscriminator;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
-@BsonDiscriminator("ClientType")
+@BsonDiscriminator("clientType")
 public class ClientType {
     @BsonProperty("max_articles")
     protected int maxArticles;

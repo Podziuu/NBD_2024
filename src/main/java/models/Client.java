@@ -4,6 +4,7 @@ import org.bson.codecs.pojo.annotations.*;
 import org.bson.types.ObjectId;
 
 public class Client {
+    @BsonId
     private ObjectId id;
     @BsonProperty("personalId")
     private long personalID;
@@ -25,6 +26,7 @@ public class Client {
         this.firstName = firstName;
         this.lastName = lastName;
         this.clientType = clientType;
+        this.archive = false;
     }
 
     @BsonIgnore
@@ -34,6 +36,10 @@ public class Client {
 
     public ObjectId getId() {
         return id;
+    }
+
+    public void setId(ObjectId id) {
+        this.id = id;
     }
 
     public long getPersonalId() {

@@ -1,8 +1,10 @@
 package repos;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.InsertOneResult;
+import com.mongodb.client.result.UpdateResult;
 import models.Client;
 import org.bson.types.ObjectId;
 
@@ -15,6 +17,7 @@ public class ClientRepository {
 
     public ObjectId addClient(Client client) {
         InsertOneResult result = clientCollection.insertOne(client);
+        client.setId(result.getInsertedId().asObjectId().getValue());
         return result.getInsertedId().asObjectId().getValue();
     }
 
@@ -23,10 +26,14 @@ public class ClientRepository {
     }
 
     public void updateClient(Client client) {
-        clientCollection.replaceOne(Filters.eq("_id", client.getId()), client);
+        BasicDBObject object = new BasicDBObject();
+        object.put("_id", client.getId());
+        clientCollection.replaceOne(object, client);
     }
 
     public void removeClient(ObjectId id) {
-        clientCollection.deleteOne(Filters.eq("_id", id));
+        BasicDBObject object = new BasicDBObject();
+        object.put("_id", id);
+        clientCollection.deleteOne(object);
     }
 }

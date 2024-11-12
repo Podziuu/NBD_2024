@@ -1,6 +1,7 @@
 package models;
 
 import org.bson.codecs.pojo.annotations.BsonDiscriminator;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 
 @BsonDiscriminator("Membership")
 public class Membership extends ClientType {
@@ -15,6 +16,7 @@ public class Membership extends ClientType {
         return price - (price * discount / 100);
     }
 
+    @BsonIgnore
     @Override
     public String getClientTypeInfo() {
         return "Membership: " + this.getMaxArticles() + " articles, discount: " + discount + "%";

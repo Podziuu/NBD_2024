@@ -3,6 +3,8 @@ package models;
 import org.bson.codecs.pojo.annotations.*;
 import org.bson.types.ObjectId;
 
+import java.util.List;
+
 public class Client {
     @BsonId
     private ObjectId id;
@@ -16,6 +18,8 @@ public class Client {
     private boolean archive;
     @BsonProperty("clientType")
     private ClientType clientType;
+    @BsonProperty("rents")
+    private List<ObjectId> rents;
 
     @BsonCreator
     public Client(@BsonProperty("personalId") long personalID,
@@ -40,6 +44,19 @@ public class Client {
 
     public void setId(ObjectId id) {
         this.id = id;
+    }
+
+    public void addRent(ObjectId rent) {
+        rents.add(rent);
+    }
+
+    public void removeRent(ObjectId rent) {
+        rents.remove(rent);
+    }
+
+    @BsonIgnore
+    public int getRentsCount() {
+        return rents.size();
     }
 
     public long getPersonalId() {

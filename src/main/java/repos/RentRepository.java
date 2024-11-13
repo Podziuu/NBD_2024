@@ -1,69 +1,42 @@
 package repos;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.InsertOneResult;
 import exceptions.LogicException;
 import models.Rent;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RentRepository {
-    private List<Rent> rentRepositoryList;
+    private final MongoCollection<Rent> rentCollection;
 
-    public RentRepository() {
-        rentRepositoryList = new ArrayList<>();
+    public RentRepository(MongoCollection<Rent> rentCollection) {
+        this.rentCollection = rentCollection;
     }
 
-    // Znalezienie wynajmu po jego ID
-    public Rent find(String id) {
-        for (Rent rent : rentRepositoryList) {
-            if (rent.getRentId().equals(id)) {
-                return rent;
-            }
-        }
-        return null; // Zwraca null, gdy nie znajdzie wynajmu
+    public ObjectId addRent(Rent rent) {
+        InsertOneResult result = rentCollection.insertOne(rent);
+        rent.setRentId(result.getInsertedId().asObjectId().getValue());
+        return result.getInsertedId().asObjectId().getValue();
     }
 
-    // Pobranie wynajmu po indeksie
-    public Rent get(int i) {
-        if (i >= rentRepositoryList.size()) {
-            return null; // Zwraca null, gdy indeks wykracza poza listę
-        }
-        return rentRepositoryList.get(i);
+    public Rent getRent(ObjectId id) {
+        return rentCollection.find(Filters.eq("_id", id)).first();
     }
 
-    // Dodanie nowego wynajmu
-    public void add(Rent rent) throws LogicException {
-        if (rent != null) {
-            if (find(rent.getRentId()) != null) {
-                throw new LogicException("Rent with this ID already exists in repository");
-            }
-            rentRepositoryList.add(rent);
-        }
+    public void updateRent(Rent rent) {
+        BasicDBObject object = new BasicDBObject();
+        object.put("_id", rent.getId());
+        rentCollection.replaceOne(object, rent);
     }
 
-    // Usunięcie wynajmu
-    public void remove(Rent rent) {
-        if (rent != null) {
-            rentRepositoryList.removeIf(r -> r.equals(rent)); // Usuwa wynajem z listy
-        }
-    }
-
-    // Generowanie raportu z listy wynajmów
-    public String report() {
-        StringBuilder report = new StringBuilder();
-        for (Rent rent : rentRepositoryList) {
-            report.append(rent.getRentInfo()); // Dodaje informacje o każdym wynajmie do raportu
-        }
-        return report.toString();
-    }
-
-    // Pobranie liczby wynajmów w repozytorium
-    public int getSize() {
-        return rentRepositoryList.size();
-    }
-
-    // Pobranie wszystkich wynajmów w repozytorium
-    public List<Rent> getAll() {
-        return new ArrayList<>(rentRepositoryList); // Zwraca kopię listy wszystkich wynajmów
+    public void removeRent(ObjectId id) {
+        BasicDBObject object = new BasicDBObject();
+        object.put("_id", id);
+        rentCollection.deleteOne(object);
     }
 }

@@ -3,65 +3,49 @@ package managers;
 import models.Client;
 import models.Item;
 import models.Rent;
+import org.bson.types.ObjectId;
+import repos.RentRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 public class RentManager {
-    private List<Rent> rents;
+    private final RentRepository rentRepository;
+    ClientManager clientManager;
 
-    public RentManager() {
-        this.rents = new ArrayList<>();
+    public RentManager(RentRepository rentRepository, ClientManager clientManager) {
+        this.rentRepository = rentRepository;
+        this.clientManager = clientManager;
     }
 
-    public Rent rentItem(String rentId, LocalDateTime beginTime, Client client, Item item) {
-        Rent rent = new Rent(rentId, beginTime, client, item);
-        rents.add(rent);
-        return rent;
-    }
-
-    public void returnItem(Item item) {
-        rents.stream().filter(rent -> rent.getItem().equals(item)).findFirst().ifPresent(rent -> {
-            rent.endRent(LocalDateTime.now());
-            rent.setArchive(true);
-        });
-    }
-
-    public List<Rent> getAllClientRents(Client client) {
-        List<Rent> clientRents = new ArrayList<>();
-        for (Rent rent : rents) {
-            if (rent.getClient().equals(client)) {
-                clientRents.add(rent);
-            }
+    public void rentItem(LocalDateTime beginTime, Client client, Item item) {
+        int max = client.getClientType().getMaxArticles();
+        int rented = client.getRentsCount();
+        if (rented >= max) {
+            throw new IllegalArgumentException("Client has reached maximum number of rented items");
         }
-        return clientRents;
+        Rent rent = new Rent(beginTime, client, item);
+        // TODO: Zmienic zeby item nie byl available
+        rentRepository.addRent(rent);
+        clientManager.addRent(client.getId(), rent.getId());
     }
 
-    public List<Rent> getAll() {
-        return rents;
+    public void returnItem(ObjectId rentId, Item item) {
+        Rent rent = rentRepository.getRent(rentId);
+        rent.endRent(LocalDateTime.now());
+        rent.setArchive(true);
+        rentRepository.updateRent(rent);
+        clientManager.removeRent(rent.getClient().getId(), rent.getId());
+        // TODO: Zmienic zeby item byl available
     }
 
-    public Optional<Rent> find(String rentId) {
-        return rents.stream().filter(rent -> rent.getRentId().equals(rentId)).findFirst();
+    public void removeRent(ObjectId rentId) {
+        Rent rent = rentRepository.getRent(rentId);
+        rentRepository.removeRent(rentId);
+        clientManager.removeRent(rent.getClient().getId(), rent.getId());
     }
 
-    public String report() {
-        StringBuilder report = new StringBuilder();
-        for (Rent rent : rents) {
-            report.append(rent.getRentInfo()).append("\n");
-        }
-        return report.toString();
+    public Rent getRent(ObjectId rentId) {
+        return rentRepository.getRent(rentId);
     }
 
-    public List<Rent> getAllArchiveRents() {
-        List<Rent> archivedRents = new ArrayList<>();
-        for (Rent rent : rents) {
-            if (rent.isArchive()) {
-                archivedRents.add(rent);
-            }
-        }
-        return archivedRents;
-    }
 }

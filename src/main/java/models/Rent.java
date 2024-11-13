@@ -1,18 +1,30 @@
 package models;
 
+import org.bson.codecs.pojo.annotations.BsonCreator;
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
+import org.bson.types.ObjectId;
+
 import java.time.LocalDateTime;
 
 public class Rent {
-    private String rentId;
+    @BsonId
+    private ObjectId id;
+    @BsonProperty("beginTime")
     private LocalDateTime beginTime;
+    @BsonProperty("endTime")
     private LocalDateTime endTime;
+    @BsonProperty("rentCost")
     private int rentCost;
+    @BsonProperty("archive")
     private boolean archive = false;
+    @BsonProperty("client")
     private Client client;
+    @BsonProperty("item")
     private Item item;
 
-    public Rent(String rentId, LocalDateTime beginTime, Client client, Item item) {
-        this.rentId = rentId;
+    @BsonCreator
+    public Rent(@BsonProperty LocalDateTime beginTime, @BsonProperty Client client, @BsonProperty Item item) {
         this.beginTime = beginTime;
         this.client = client;
         this.item = item;
@@ -20,11 +32,14 @@ public class Rent {
 
     public void endRent(LocalDateTime endTime) {
         this.endTime = endTime;
-        // Możesz tu obliczyć rentCost na podstawie czasu wypożyczenia
     }
 
-    public String getRentId() {
-        return rentId;
+    public ObjectId getId() {
+        return id;
+    }
+
+    public void setRentId(ObjectId id) {
+        this.id = id;
     }
 
     public long getRentDays() {
@@ -44,7 +59,7 @@ public class Rent {
     }
 
     public String getRentInfo() {
-        return "Rent ID: " + rentId + ", Client: " + client.getFirstName() + ", Item: " + item.getItemName();
+        return "Rent ID: " + id + ", Client: " + client.getFirstName() + ", Item: " + item.getItemName();
     }
 
     public LocalDateTime getBeginTime() {

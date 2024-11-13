@@ -37,6 +37,24 @@ public class ClientManager {
         clientRepository.updateClient(client);
     }
 
+    public void addRent(ObjectId id, ObjectId rentId) {
+        if (clientRepository.getClient(id) == null) {
+            throw new NullPointerException("Client not found");
+        }
+        Client client = clientRepository.getClient(id);
+        client.addRent(rentId);
+        clientRepository.updateClient(client);
+    }
+
+    public void removeRent(ObjectId id, ObjectId rentId) {
+        if (clientRepository.getClient(id) == null) {
+            throw new NullPointerException("Client not found");
+        }
+        Client client = clientRepository.getClient(id);
+        client.removeRent(rentId);
+        clientRepository.updateClient(client);
+    }
+
     public void removeClient(ObjectId id) {
         if (clientRepository.getClient(id) == null) {
             throw new NullPointerException("Client not found");

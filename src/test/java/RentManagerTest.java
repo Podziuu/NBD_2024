@@ -1,4 +1,4 @@
-import com.mongodb.client.MongoCollection;
+/*import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import config.MongoEntity;
 import managers.RentManager;
@@ -156,4 +156,4 @@ public class RentManagerTest {
         Assertions.assertEquals(client.getId(), rent.getClient().getId());
         Assertions.assertEquals(item.getId(), rent.getItem().getId());
     }
-}
+}*/

@@ -6,7 +6,6 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.List;
 
-@BsonDiscriminator("Client")
 public class Client {
     @BsonId
     private ObjectId id;

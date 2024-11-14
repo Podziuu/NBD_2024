@@ -34,6 +34,7 @@ public class ClientManagerTest {
     @Test
     void createClientTest() {
         ObjectId id = clientManager.addClient("Jan", "Kowalski", 123456789, "DiamondMembership");
+        System.out.println(id);
         Assertions.assertNotNull(clientManager.getClient(id));
     }
 
@@ -63,7 +64,6 @@ public class ClientManagerTest {
         ObjectId id = clientManager.addClient("Jan", "Kowalski", 123456789, "DiamondMembership");
         clientManager.updateClient(id, "Janusz", "Nowak", "NoMembership");
         Client client = clientManager.getClient(id);
-        System.out.println(client.getClientType().getClass());
         Assertions.assertEquals("Janusz", client.getFirstName());
         Assertions.assertEquals("Nowak", client.getLastName());
         Assertions.assertEquals(0, client.getClientType().getDiscount());

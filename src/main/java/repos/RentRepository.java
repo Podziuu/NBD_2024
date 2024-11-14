@@ -20,7 +20,7 @@ public class RentRepository {
 
     public ObjectId addRent(Rent rent) {
         InsertOneResult result = rentCollection.insertOne(rent);
-        rent.setRentId(result.getInsertedId().asObjectId().getValue());
+        rent.setId(result.getInsertedId().asObjectId().getValue());
         return result.getInsertedId().asObjectId().getValue();
     }
 

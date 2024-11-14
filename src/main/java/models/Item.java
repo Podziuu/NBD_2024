@@ -4,7 +4,7 @@ import org.bson.codecs.pojo.annotations.*;
 import org.bson.types.ObjectId;
 
 @BsonDiscriminator("Item")
-public abstract class Item {
+public class Item {
     @BsonId
     private ObjectId id;
     @BsonProperty("basePrice")

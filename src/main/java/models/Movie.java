@@ -4,15 +4,15 @@ import org.bson.codecs.pojo.annotations.*;
 
 @BsonDiscriminator("Movie")
 public class Movie extends Item {
-    @BsonProperty
+    @BsonProperty("minutes")
     private int minutes;
-    @BsonProperty
+    @BsonProperty("casette")
     private boolean casette;
 
-    public Movie(@BsonProperty int basePrice,
-                 @BsonProperty String itemName,
-                 @BsonProperty int minutes,
-                 @BsonProperty boolean casette) {
+    public Movie(@BsonProperty("basePrice") int basePrice,
+                 @BsonProperty("itemName") String itemName,
+                 @BsonProperty("minutes") int minutes,
+                 @BsonProperty("casette") boolean casette) {
         super(basePrice, itemName);
         this.itemType = "movie";
         this.minutes = minutes;

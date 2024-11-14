@@ -7,15 +7,15 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 
 @BsonDiscriminator("Music")
 public class Music extends Item {
-    @BsonProperty
+    @BsonProperty("genre")
     private MusicGenre genre;
-    @BsonProperty
+    @BsonProperty("vinyl")
     private boolean vinyl;
 
-    public Music(@BsonProperty int basePrice,
-                 @BsonProperty String itemName,
-                 @BsonProperty MusicGenre genre,
-                 @BsonProperty boolean vinyl) {
+    public Music(@BsonProperty("basePrice") int basePrice,
+                 @BsonProperty("itemName") String itemName,
+                 @BsonProperty("genre") MusicGenre genre,
+                 @BsonProperty("vinyl") boolean vinyl) {
         super(basePrice, itemName);
         this.itemType = "movie";
         this.genre = genre;

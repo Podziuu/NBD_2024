@@ -7,12 +7,12 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 
 @BsonDiscriminator("Comics")
 public class Comics extends Item {
-    @BsonProperty
+    @BsonProperty("pageNumber")
     private int pageNumber;
 
-    public Comics(@BsonProperty int basePrice,
-                  @BsonProperty String itemName,
-                  @BsonProperty int pageNumber) {
+    public Comics(@BsonProperty("basePrice") int basePrice,
+                  @BsonProperty("itemName") String itemName,
+                  @BsonProperty("pageNumber") int pageNumber) {
         super(basePrice, itemName);
         this.itemType = "comics";
         this.pageNumber = pageNumber;

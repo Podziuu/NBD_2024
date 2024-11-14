@@ -5,7 +5,6 @@ import org.bson.codecs.pojo.annotations.BsonDiscriminator;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
-@BsonDiscriminator("clientType")
 public class ClientType {
     @BsonProperty("max_articles")
     protected int maxArticles;
@@ -13,7 +12,14 @@ public class ClientType {
     protected int discount;
 
     @BsonCreator
+    public ClientType(@BsonProperty("max_articles") int maxArticles,
+                      @BsonProperty("discount") int discount) {
+        this.maxArticles = maxArticles;
+        this.discount = discount;
+    }
+
     public ClientType() {
+
     }
 
     public int getMaxArticles() {
@@ -24,12 +30,20 @@ public class ClientType {
         return discount;
     }
 
-    public int applyDiscount(int price) {
-        return price;
-    }
-
     @BsonIgnore
     public String getClientTypeInfo() {
         return "\nMaksymalna ilość wypożyczonych artykułów: " + this.getMaxArticles();
+    }
+
+    public static ClientType createDiamondMembership() {
+        return new ClientType(15, 30);
+    }
+
+    public static ClientType createMembership() {
+        return new ClientType(10, 20);
+    }
+
+    public static ClientType createNoMembership() {
+        return new ClientType(2, 0);
     }
 }

@@ -1,4 +1,4 @@
-/*import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import config.MongoEntity;
 import managers.RentManager;
@@ -52,108 +52,121 @@ public class RentManagerTest {
     }
 
     @Test
-    void rentItemTest() {
-        ClientType clientType = new DiamondMembership();
-        Client client = new Client(123456789, "Jan", "Kowalski", clientType);
-        clientRepository.addClient(client);
-
-        ItemType itemType = new Music();
-        Item item = new Item(12, "Kizo", itemType);
-        itemRepository.addItem(item);
+    void testItemNotAvailableForRent() {
+        ObjectId clientId = clientManager.addClient("Robert", "Kolonko", 123456789, "DiamondMembership");
+        Client client = clientManager.getClient(clientId);
+        ObjectId itemId = itemManager.addComics(100, "Comics", 100);
+        Item item = itemManager.getItem(itemId);
 
         LocalDateTime beginTime = LocalDateTime.now();
         rentManager.rentItem(beginTime, client, item);
 
-        Rent rent = rentRepository.getRent(item.getId());
-        Assertions.assertNotNull(rent);
-        Assertions.assertEquals(client.getId(), rent.getClient().getId());
-        Assertions.assertEquals(item.getId(), rent.getItem().getId());
+        Item item1 = itemManager.getItem(itemId);
+
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            rentManager.rentItem(beginTime, client, item1);
+        }, "Item should not be available after being rented.");
+    }
+
+    @Test
+    void rentItemTest() {
+        ObjectId clientId = clientManager.addClient("Jan", "Kowalski", 123456789, "DiamondMembership");
+        Client client = clientManager.getClient(clientId);
+
+        ObjectId itemId = itemManager.addMusic(100, "Album", MusicGenre.Metal, true);
+        Item item = itemManager.getItem(itemId);
+
+        LocalDateTime beginTime = LocalDateTime.now();
+        ObjectId rentId = rentManager.rentItem(beginTime, client, item);
+
+        Rent rent = rentManager.getRent(rentId);
+        Assertions.assertNotNull(rent, "Wypożyczenie nie zostało zapisane poprawnie");
+        Assertions.assertEquals(client.getId(), rent.getClient().getId(), "ID klienta w wypożyczeniu jest niepoprawne");
+        Assertions.assertEquals(item.getId(), rent.getItem().getId(), "ID przedmiotu w wypożyczeniu jest niepoprawne");
+
+        Item rentedItem = itemManager.getItem(itemId);
+        Assertions.assertFalse(rentedItem.isAvailable(), "Przedmiot powinien być oznaczony jako niedostępny");
     }
 
     @Test
     void rentItemMaxRentExceededTest() {
-        ClientType clientType = new NoMembership();
-        Client client = new Client(123456789, "Jan", "Kowalski", clientType);
-        clientRepository.addClient(client);
+        ObjectId clientId = clientManager.addClient("Robert", "Kolonko", 123456789, "NoMembership");
+        Client client = clientManager.getClient(clientId);
 
-        ItemType itemType1 = new Music();
-        Item item1 = new Item(12, "Kizo", itemType1);
+        ObjectId itemId = itemManager.addComics(100, "Comics1", 100);
+        Item item1 = itemManager.getItem(itemId);
 
-        ItemType itemType2 = new Movie();
-        Item item2 = new Item(34, "Szergowiec Ryan", itemType2);
+        ObjectId itemId2 = itemManager.addComics(100, "Comics2", 100);
+        Item item2 = itemManager.getItem(itemId2);
 
+        LocalDateTime beginTime = LocalDateTime.now();
+        rentManager.rentItem(beginTime, client, item1);
+        rentManager.rentItem(beginTime, client, item2);
 
-        itemRepository.addItem(item1);
-        itemRepository.addItem(item2);
+        Client client1 = clientManager.getClient(clientId);
 
-        rentManager.rentItem(LocalDateTime.now(), client, item1);
-        rentManager.rentItem(LocalDateTime.now(), client, item2);
-
-        ItemType itemType3 = new Comics();
-        Item item1 = new Item(12, "Kizo", itemType1);
-        itemRepository.addItem(item3);
+        ObjectId itemId3 = itemManager.addComics(100, "Comics3", 100);
+        Item item3 = itemManager.getItem(itemId3);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            rentManager.rentItem(LocalDateTime.now(), client, item3);
+            rentManager.rentItem(LocalDateTime.now(), client1, item3);
         });
     }
 
     @Test
     void returnItemTest() {
-        ClientType clientType = new DiamondMembership();
-        Client client = new Client(123456789, "Jan", "Kowalski", clientType);
-        clientRepository.addClient(client);
+        ObjectId clientId = clientManager.addClient("Robert", "Kolonko", 123456789, "NoMembership");
+        Client client = clientManager.getClient(clientId);
 
-        ItemType itemType = new Music();
-        Item item = new Item(12, "Kizo", itemType);
-        itemRepository.addItem(item);
-
+        ObjectId itemId = itemManager.addComics(100, "Comics1", 100);
+        Item item = itemManager.getItem(itemId);
         LocalDateTime beginTime = LocalDateTime.now();
-        rentManager.rentItem(beginTime, client, item);
-        Rent rent = rentRepository.getRent(item.getId());
-        rentManager.returnItem(rent.getId(), item);
+        ObjectId rentId = rentManager.rentItem(beginTime, client, item);
+        rentManager.returnItem(rentId);
 
-        rent = rentRepository.getRent(rent.getId());
+        Rent rent = rentManager.getRent(rentId);
         Assertions.assertTrue(rent.isArchive());
+        Assertions.assertTrue(item.isAvailable());
+        System.out.println(rent.getEndTime());
         Assertions.assertNotNull(rent.getEndTime());
     }
-
-    @Test
-    void removeRentTest() {
-        ClientType clientType = new DiamondMembership();
-        Client client = new Client(123456789, "Jan", "Kowalski", clientType);
-        clientRepository.addClient(client);
-
-        ItemType itemType = new Music();
-        Item item = new Item(12, "Kizo", itemType);
-        itemRepository.addItem(item);
-
-        LocalDateTime beginTime = LocalDateTime.now();
-        rentManager.rentItem(beginTime, client, item);
-
-        Rent rent = rentRepository.getRent(item.getId());
-
-        rentManager.removeRent(rent.getId());
-
-        Assertions.assertNull(rentRepository.getRent(rent.getId()));
-    }
-
-    @Test
-    void getRentTest() {
-        ClientType clientType = new DiamondMembership();
-        Client client = new Client(123456789, "Jan", "Kowalski", clientType);
-        clientRepository.addClient(client);
-
-        ItemType itemType = new Music();
-        Item item = new Item(12, "Kizo", itemType);
-        itemRepository.addItem(item);
-
-        LocalDateTime beginTime = LocalDateTime.now();
-        rentManager.rentItem(beginTime, client, item);
-
-        Rent rent = rentRepository.getRent(item.getId());
-        Assertions.assertNotNull(rent);
-        Assertions.assertEquals(client.getId(), rent.getClient().getId());
-        Assertions.assertEquals(item.getId(), rent.getItem().getId());
-    }
-}*/
+//
+//    @Test
+//    void removeRentTest() {
+//        ClientType clientType = new DiamondMembership();
+//        Client client = new Client(123456789, "Jan", "Kowalski", clientType);
+//        clientRepository.addClient(client);
+//
+//        ItemType itemType = new Music();
+//        Item item = new Item(12, "Kizo", itemType);
+//        itemRepository.addItem(item);
+//
+//        LocalDateTime beginTime = LocalDateTime.now();
+//        rentManager.rentItem(beginTime, client, item);
+//
+//        Rent rent = rentRepository.getRent(item.getId());
+//
+//        rentManager.removeRent(rent.getId());
+//
+//        Assertions.assertNull(rentRepository.getRent(rent.getId()));
+//    }
+//
+//    @Test
+//    void getRentTest() {
+//        ClientType clientType = new DiamondMembership();
+//        Client client = new Client(123456789, "Jan", "Kowalski", clientType);
+//        clientRepository.addClient(client);
+//
+//        ItemType itemType = new Music();
+//        Item item = new Item(12, "Kizo", itemType);
+//        itemRepository.addItem(item);
+//
+//        LocalDateTime beginTime = LocalDateTime.now();
+//        rentManager.rentItem(beginTime, client, item);
+//
+//        Rent rent = rentRepository.getRent(item.getId());
+//        Assertions.assertNotNull(rent);
+//        Assertions.assertEquals(client.getId(), rent.getClient().getId());
+//        Assertions.assertEquals(item.getId(), rent.getItem().getId());
+//    }
+}

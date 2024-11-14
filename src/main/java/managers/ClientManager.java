@@ -5,12 +5,16 @@ import repos.ClientRepository;
 
 import models.Client;
 import models.ClientType;
-import models.DiamondMembership;
-import models.Membership;
-import models.NoMembership;
+
+import java.util.Map;
 
 public class ClientManager {
     private final ClientRepository clientRepository;
+    private static final Map<String, ClientType> clientTypes = Map.of(
+            "DiamondMembership", ClientType.createDiamondMembership(),
+            "Membership", ClientType.createMembership(),
+            "NoMembership", ClientType.createNoMembership()
+    );
 
     public ClientManager(ClientRepository clientRepository) {
         this.clientRepository = clientRepository;
@@ -43,7 +47,7 @@ public class ClientManager {
         }
         Client client = clientRepository.getClient(id);
         client.addRent(rentId);
-        clientRepository.updateClient(client);
+        clientRepository.addRentToClient(client.getId(), rentId);
     }
 
     public void removeRent(ObjectId id, ObjectId rentId) {
@@ -81,11 +85,10 @@ public class ClientManager {
     }
 
     private ClientType getClientType(String clientType) {
-        return switch (clientType) {
-            case "DiamondMembership" -> new DiamondMembership();
-            case "Membership" -> new Membership();
-            case "NoMembership" -> new NoMembership();
-            default -> throw new IllegalArgumentException("Invalid client type");
-        };
+        ClientType type = clientTypes.get(clientType);
+        if (type == null) {
+            throw new IllegalArgumentException("Invalid client type");
+        }
+        return type;
     }
 }

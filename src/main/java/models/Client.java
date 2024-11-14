@@ -3,8 +3,10 @@ package models;
 import org.bson.codecs.pojo.annotations.*;
 import org.bson.types.ObjectId;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@BsonDiscriminator("Client")
 public class Client {
     @BsonId
     private ObjectId id;
@@ -31,6 +33,11 @@ public class Client {
         this.lastName = lastName;
         this.clientType = clientType;
         this.archive = false;
+        this.rents = new ArrayList<>();
+    }
+
+    public Client() {
+
     }
 
     @BsonIgnore
@@ -47,11 +54,21 @@ public class Client {
     }
 
     public void addRent(ObjectId rent) {
-        rents.add(rent);
+        List<ObjectId> updatedRents = new ArrayList<>(rents);
+        updatedRents.add(rent);
+        this.rents = updatedRents;
     }
 
     public void removeRent(ObjectId rent) {
         rents.remove(rent);
+    }
+
+    public void setRents(List<ObjectId> rents) {
+        this.rents = rents;
+    }
+
+    public List<ObjectId> getRents() {
+        return rents;
     }
 
     @BsonIgnore

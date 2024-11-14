@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import repos.ItemRepository;
 
 public class ItemManagerTest {
-
     private static MongoEntity mongoEntity;
     private static MongoDatabase database;
     private static MongoCollection<Item> itemCollection;
@@ -33,21 +32,26 @@ public class ItemManagerTest {
     }
 
     @Test
-    void addItemTest() {
-        ObjectId itemId = itemManager.addItem(100, "Album", "Music");
+    void addMusicTest() {
+        ObjectId itemId = itemManager.addMusic(100, "Album", MusicGenre.Metal, true);
         Assertions.assertNotNull(itemManager.getItem(itemId));
     }
 
     @Test
-    void addItemInvalidTypeTest() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            itemManager.addItem(100, "Movie", "InvalidType");
-        });
+    void addMovieTest() {
+        ObjectId itemId = itemManager.addMovie(100, "Movie", 120, true);
+        Assertions.assertNotNull(itemManager.getItem(itemId));
+    }
+
+    @Test
+    void addComicsTest() {
+        ObjectId itemId = itemManager.addComics(100, "Comics", 100);
+        Assertions.assertNotNull(itemManager.getItem(itemId));
     }
 
     @Test
     void removeItemTest() {
-        ObjectId itemId = itemManager.addItem(100, "Album", "Music");
+        ObjectId itemId = itemManager.addMovie(100, "Movie", 120, true);
         itemManager.removeItem(itemId);
         Assertions.assertNull(itemManager.getItem(itemId));
     }
@@ -61,34 +65,35 @@ public class ItemManagerTest {
 
     @Test
     void updateItemTest() {
-        ObjectId itemId = itemManager.addItem(100, "Album", "Music");
-        itemManager.updateItem(itemId, 150, "New Album", "Music");
+        ObjectId itemId = itemManager.addComics(100, "Spiderman", 100);
+        itemManager.updateItem(itemId, 150, "Batman");
         Item item = itemManager.getItem(itemId);
-        Assertions.assertEquals("New Album", item.getItemName());
+        Assertions.assertEquals("Batman", item.getItemName());
         Assertions.assertEquals(150, item.getBasePrice());
     }
 
     @Test
     void updateItemInvalidIdTest() {
         Assertions.assertThrows(NullPointerException.class, () -> {
-            itemManager.updateItem(new ObjectId(), 150, "New Album", "Music");
+            itemManager.updateItem(new ObjectId(), 150, "New Album");
         });
     }
 
     @Test
-    void setAvailableTest() {
-        ObjectId itemId = itemManager.addItem(100, "Album", "Music");
-        itemManager.setAvailable(itemId);
-        Item item = itemManager.getItem(itemId);
-        Assertions.assertTrue(item.isAvailable());
-    }
-
-    @Test
     void setUnavailableTest() {
-        ObjectId itemId = itemManager.addItem(100, "Album", "Music");
+        ObjectId itemId = itemManager.addComics(100, "Superman", 100);
         itemManager.setUnavailable(itemId);
         Item item = itemManager.getItem(itemId);
         Assertions.assertFalse(item.isAvailable());
+    }
+
+    @Test
+    void setAvailableTest() {
+        ObjectId itemId = itemManager.addComics(100, "Superman", 100);
+        itemManager.setUnavailable(itemId);
+        itemManager.setAvailable(itemId);
+        Item item = itemManager.getItem(itemId);
+        Assertions.assertTrue(item.isAvailable());
     }
 
     @Test

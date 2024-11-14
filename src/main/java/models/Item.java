@@ -3,7 +3,8 @@ package models;
 import org.bson.codecs.pojo.annotations.*;
 import org.bson.types.ObjectId;
 
-public class Item {
+@BsonDiscriminator("Item")
+public abstract class Item {
     @BsonId
     private ObjectId id;
     @BsonProperty("basePrice")
@@ -13,17 +14,15 @@ public class Item {
     @BsonProperty("available")
     protected boolean available;
     @BsonProperty("itemType")
-    private ItemType itemType;
+    protected String itemType;
 
     @BsonCreator
     public Item(
             @BsonProperty("basePrice") int basePrice,
-            @BsonProperty("itemName") String itemName,
-            @BsonProperty("itemType") ItemType itemType) {
+            @BsonProperty("itemName") String itemName) {
         this.basePrice = basePrice;
         this.itemName = itemName;
         this.available = true;
-        this.itemType = itemType;
     }
 
     public Item() {
@@ -71,11 +70,11 @@ public class Item {
         this.itemName = itemName;
     }
 
-    public ItemType getItemType() {
+    public String getItemType() {
         return itemType;
     }
 
-    public void setItemType(ItemType itemType) {
+    public void setItemType(String itemType) {
         this.itemType = itemType;
     }
 }

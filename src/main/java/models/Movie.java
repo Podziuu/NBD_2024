@@ -1,18 +1,41 @@
 package models;
 
-import org.bson.codecs.pojo.annotations.BsonDiscriminator;
-import org.bson.codecs.pojo.annotations.BsonIgnore;
-import org.bson.codecs.pojo.annotations.BsonProperty;
-import org.bson.codecs.pojo.annotations.BsonCreator;
+import org.bson.codecs.pojo.annotations.*;
 
-@BsonDiscriminator("movie")
-public class Movie extends ItemType {
-    public Movie() {
+@BsonDiscriminator("Movie")
+public class Movie extends Item {
+    @BsonProperty
+    private int minutes;
+    @BsonProperty
+    private boolean casette;
+
+    public Movie(@BsonProperty int basePrice,
+                 @BsonProperty String itemName,
+                 @BsonProperty int minutes,
+                 @BsonProperty boolean casette) {
+        super(basePrice, itemName);
+        this.itemType = "movie";
+        this.minutes = minutes;
+        this.casette = casette;
     }
 
-    @BsonIgnore
-    @Override
-    public String getItemTypeInfo() {
-        return "Movie.";
+    public Movie() {
+
+    }
+
+    public int getMinutes() {
+        return minutes;
+    }
+
+    public void setMinutes(int minutes) {
+        this.minutes = minutes;
+    }
+
+    public boolean isCasette() {
+        return casette;
+    }
+
+    public void setCasette(boolean casette) {
+        this.casette = casette;
     }
 }

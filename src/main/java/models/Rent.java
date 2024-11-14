@@ -35,24 +35,28 @@ public class Rent {
 
     }
 
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setBeginTime(LocalDateTime beginTime) {
-        this.beginTime = beginTime;
-    }
-
     public ObjectId getId() {
         return id;
     }
 
     public void setId(ObjectId id) {
         this.id = id;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public LocalDateTime getBeginTime() {
+        return beginTime;
+    }
+
+    public void setBeginTime(LocalDateTime beginTime) {
+        this.beginTime = beginTime;
     }
 
     @BsonIgnore
@@ -62,6 +66,10 @@ public class Rent {
 
     public int getRentCost() {
         return rentCost;
+    }
+
+    public void setRentCost(int rentCost) {
+        this.rentCost = rentCost;
     }
 
     public Client getClient() {
@@ -80,20 +88,16 @@ public class Rent {
         this.item = item;
     }
 
-    @BsonIgnore
-    public String getRentInfo() {
-        return "Rent ID: " + id + ", Client: " + client.getFirstName() + ", Item: " + item.getItemName();
-    }
-
-    public LocalDateTime getBeginTime() {
-        return beginTime;
-    }
-
     public boolean isArchive() {
         return archive;
     }
 
     public void setArchive(boolean archive) {
         this.archive = archive;
+    }
+
+    @BsonIgnore
+    public String getRentInfo() {
+        return "Rent ID: " + id + ", Client: " + client.getFirstName() + ", Item: " + item.getItemName();
     }
 }

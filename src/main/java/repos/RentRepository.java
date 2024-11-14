@@ -4,12 +4,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.InsertOneResult;
-import exceptions.LogicException;
 import models.Rent;
 import org.bson.types.ObjectId;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RentRepository {
     private final MongoCollection<Rent> rentCollection;

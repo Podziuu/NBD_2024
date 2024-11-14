@@ -38,13 +38,11 @@ public class ClientRepository {
     }
 
     public Client addRentToClient(ObjectId clientId, ObjectId rentId) {
-        // Dodaj rentId do bazy
         clientCollection.updateOne(
                 Filters.eq("_id", clientId),
                 Updates.push("rents", rentId)
         );
 
-        // Pobierz zaktualizowanego klienta z bazy danych
         Client updatedClient = clientCollection.find(Filters.eq("_id", clientId)).first();
         return updatedClient;
     }

@@ -46,6 +46,4 @@ public abstract class AbstractMongoEntity implements AutoCloseable  {
         mongoClient = MongoClients.create(settings);
         database = mongoClient.getDatabase("mediastore");
     }
-
-
 }

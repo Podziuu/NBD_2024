@@ -4,25 +4,26 @@ import org.bson.codecs.pojo.annotations.*;
 import org.bson.types.ObjectId;
 
 public class Item {
-    //private ObjectId id;
     @BsonId
-    private long itemId;
-    @BsonProperty("base_price")
+    private ObjectId id;
+    @BsonProperty("basePrice")
     protected int basePrice;
-    @BsonProperty("item_name")
+    @BsonProperty("itemName")
     protected String itemName;
     @BsonProperty("available")
     protected boolean available;
+    @BsonProperty("itemType")
+    private ItemType itemType;
 
     @BsonCreator
     public Item(
-            @BsonProperty("base_price") int basePrice,
-            @BsonProperty("item_name") String itemName,
-            @BsonProperty("available") boolean available
-    ) {
+            @BsonProperty("basePrice") int basePrice,
+            @BsonProperty("itemName") String itemName,
+            @BsonProperty("itemType") ItemType itemType) {
         this.basePrice = basePrice;
         this.itemName = itemName;
-        this.available = available;
+        this.available = true;
+        this.itemType = itemType;
     }
 
     public Item() {
@@ -31,7 +32,7 @@ public class Item {
 
     @BsonIgnore
     public String getItemInfo() {
-        return "Item ID: " + itemId + ", Name: " + itemName + ", Base Price: " + basePrice;
+        return "Item ID: " + id + ", Name: " + itemName + ", Base Price: " + basePrice;
     }
 
     public int getActualPrice() {
@@ -50,8 +51,12 @@ public class Item {
         return available;
     }
 
-    public long getItemId() {
-        return itemId;
+    public ObjectId getId() {
+        return id;
+    }
+
+    public void setId(ObjectId id) {
+        this.id = id;
     }
 
     public void setAvailable(boolean available) {
@@ -64,5 +69,13 @@ public class Item {
 
     public void setItemName(String itemName) {
         this.itemName = itemName;
+    }
+
+    public ItemType getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(ItemType itemType) {
+        this.itemType = itemType;
     }
 }

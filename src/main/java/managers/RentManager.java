@@ -11,10 +11,12 @@ import java.time.LocalDateTime;
 public class RentManager {
     private final RentRepository rentRepository;
     ClientManager clientManager;
+    ItemManager itemManager;
 
-    public RentManager(RentRepository rentRepository, ClientManager clientManager) {
+    public RentManager(RentRepository rentRepository, ClientManager clientManager, ItemManager itemManager) {
         this.rentRepository = rentRepository;
         this.clientManager = clientManager;
+        this.itemManager = itemManager;
     }
 
     public void rentItem(LocalDateTime beginTime, Client client, Item item) {
@@ -24,7 +26,7 @@ public class RentManager {
             throw new IllegalArgumentException("Client has reached maximum number of rented items");
         }
         Rent rent = new Rent(beginTime, client, item);
-        // TODO: Zmienic zeby item nie byl available
+        itemManager.setUnavailable(item.getId());
         rentRepository.addRent(rent);
         clientManager.addRent(client.getId(), rent.getId());
     }
@@ -35,7 +37,7 @@ public class RentManager {
         rent.setArchive(true);
         rentRepository.updateRent(rent);
         clientManager.removeRent(rent.getClient().getId(), rent.getId());
-        // TODO: Zmienic zeby item byl available
+        itemManager.removeItem(item.getId());
     }
 
     public void removeRent(ObjectId rentId) {

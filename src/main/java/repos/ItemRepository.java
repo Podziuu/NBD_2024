@@ -4,53 +4,38 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.InsertOneResult;
 import config.AbstractMongoEntity;
 import config.MongoEntity;
 import models.Item;
+import org.bson.types.ObjectId;
 
-public class ItemRepository extends MongoEntity {
+public class ItemRepository {
+    private final MongoCollection<Item> itemCollection;
 
-    @Override
-    public void close() throws Exception {
-
+    public ItemRepository(MongoCollection<Item> itemCollection) {
+        this.itemCollection = itemCollection;
     }
 
-    public ItemRepository() {
-        this.initDbConnection();
+    public ObjectId addItem(Item item) {
+        InsertOneResult result = itemCollection.insertOne(item);
+        item.setId(result.getInsertedId().asObjectId().getValue());
+        return result.getInsertedId().asObjectId().getValue();
     }
 
-    public void create(Item item) {
-        MongoCollection<Item> collection = getDatabase().getCollection("items", Item.class);
-        collection.insertOne(item);
+    public Item getItem(ObjectId id) {
+        return itemCollection.find(Filters.eq("_id", id)).first();
     }
 
-    public MongoCollection<Item> getItems() {
-        return getDatabase().getCollection("items", Item.class);
-    }
-
-    public Item read(long id) {
-        MongoCollection<Item> collection = getDatabase().getCollection("items", Item.class);
-        Item item = collection.find(Filters.eq("_id", id)).first();
-        return item;
-    }
-
-    public void update(Item item) {
-        MongoCollection<Item> collection = getDatabase().getCollection("items", Item.class);
+    public void updateItem(Item item) {
         BasicDBObject object = new BasicDBObject();
-        object.put("_id", item.getItemId());
-        collection.updateOne(object,
-                Updates.combine(
-                        Updates.set("base_price", item.getBasePrice()),
-                        Updates.set("item_name", item.getItemName()),
-                        Updates.set("available", item.isAvailable())
-                )
-        );
+        object.put("_id", item.getId());
+        itemCollection.replaceOne(object, item);
     }
 
-    public void delete(long id) {
-        MongoCollection<Item> collection = getDatabase().getCollection("items", Item.class);
+    public void removeItem(ObjectId id) {
         BasicDBObject object = new BasicDBObject();
         object.put("_id", id);
-        collection.deleteOne(object);
+        itemCollection.deleteOne(object);
     }
 }

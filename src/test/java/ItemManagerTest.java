@@ -1,114 +1,107 @@
 import com.mongodb.client.MongoCollection;
-import exceptions.ItemAvailableException;
-import exceptions.ItemNotAvailableException;
-import exceptions.LogicException;
+import com.mongodb.client.MongoDatabase;
+import config.MongoEntity;
 import managers.ItemManager;
 import models.*;
-import org.junit.jupiter.api.AfterEach;
+import org.bson.types.ObjectId;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import repos.ItemRepository;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 public class ItemManagerTest {
 
-    public static ItemRepository itemRepository;
-    public static ItemManager itemManager;
+    private static MongoEntity mongoEntity;
+    private static MongoDatabase database;
+    private static MongoCollection<Item> itemCollection;
+    private static ItemRepository itemRepository;
+    private static ItemManager itemManager;
 
     @BeforeAll
-    public static void setUp() {
-        itemRepository = new ItemRepository();
+    static void setUp() {
+        mongoEntity = new MongoEntity();
+        database = mongoEntity.getDatabase();
+        itemCollection = database.getCollection("items", Item.class);
+        itemRepository = new ItemRepository(itemCollection);
         itemManager = new ItemManager(itemRepository);
     }
 
-    @AfterEach
-    void dropDatabase() {
-        MongoCollection<Item> collection = itemRepository.getItems();
-        collection.drop();
+    @AfterAll
+    static void tearDown() throws Exception {
+        mongoEntity.close();
     }
 
     @Test
-    void registerMusicTest() throws ItemAvailableException, LogicException {
-        MusicGenre genre = MusicGenre.Jazz;
-
-        long id = itemManager.registerMusic(100, "Kizo Bengier", true, genre);
-
-        Item registeredMusic = itemManager.getItem(id);
-        assertNotNull(registeredMusic);
-        assertEquals("Kizo Bengier", registeredMusic.getItemName());
+    void addItemTest() {
+        ObjectId itemId = itemManager.addItem(100, "Album", "Music");
+        Assertions.assertNotNull(itemManager.getItem(itemId));
     }
 
     @Test
-    void registerMovieTest() {
-        long id = itemManager.registerMovie(120, "za szybcy za wsciekli", 120, true);
-
-        Item registeredMovie = itemManager.getItem(id);
-        assertNotNull(registeredMovie);
-        assertEquals("za szybcy za wsciekli", registeredMovie.getItemName());
-    }
-
-    @Test
-    void registerComicsTest() {
-        long id = itemManager.registerComics(50, "scooby doo czlowieku", 100);
-
-        Item registeredComics = itemManager.getItem(id);
-        assertNotNull(registeredComics);
-        assertEquals("scooby doo czlowieku", registeredComics.getItemName());
-    }
-
-    @Test
-    void deleteItemTest() throws ItemNotAvailableException, ItemAvailableException, LogicException {
-        long id = itemManager.registerMusic(100, "Kizo Bengier", true, MusicGenre.Jazz);
-
-        Item item = itemManager.getItem(id);
-        assertNotNull(item);
-
-        itemManager.deleteItem(id);
-
-        Item deletedItem = itemManager.getItem(id);
-        assertNull(deletedItem);
-    }
-
-    @Test
-    void deleteItemNotAvailableTest() {
-        Exception exception = assertThrows(ItemNotAvailableException.class, () -> {
-            itemManager.deleteItem(9999999L);
+    void addItemInvalidTypeTest() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            itemManager.addItem(100, "Movie", "InvalidType");
         });
-
-        assertEquals("itemu nie znaleziono", exception.getMessage());
     }
 
     @Test
-    void updateMusicTest() throws ItemAvailableException, LogicException, ItemNotAvailableException {
-        long id = itemManager.registerMusic(100, "Kizo Bengier", true, MusicGenre.Jazz);
-
-        itemManager.updateItem(id, 120, "OIO", MusicGenre.Metal, false, null, false, null);
-
-        Item updatedItem = itemManager.getItem(id);
-        assertNotNull(updatedItem);
-        assertEquals("OIO", updatedItem.getItemName());
+    void removeItemTest() {
+        ObjectId itemId = itemManager.addItem(100, "Album", "Music");
+        itemManager.removeItem(itemId);
+        Assertions.assertNull(itemManager.getItem(itemId));
     }
 
     @Test
-    void updateMovieTest() throws ItemNotAvailableException {
-        long id = itemManager.registerMovie(120, "za szybcy za wsciekli", 120, true);
-
-        itemManager.updateItem(id, 140, "rambo", null,null, 150, false, null);
-
-        Item updatedItem = itemManager.getItem(id);
-        assertNotNull(updatedItem);
-        assertEquals("rambo", updatedItem.getItemName());
+    void removeItemInvalidIdTest() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            itemManager.removeItem(new ObjectId());
+        });
     }
 
     @Test
-    void updateComicsTest() throws ItemNotAvailableException {
-        long id = itemManager.registerComics(50, "scooby doo", 100);
+    void updateItemTest() {
+        ObjectId itemId = itemManager.addItem(100, "Album", "Music");
+        itemManager.updateItem(itemId, 150, "New Album", "Music");
+        Item item = itemManager.getItem(itemId);
+        Assertions.assertEquals("New Album", item.getItemName());
+        Assertions.assertEquals(150, item.getBasePrice());
+    }
 
-        itemManager.updateItem(id, 60, "tytus", null, null, null, null, 120);
+    @Test
+    void updateItemInvalidIdTest() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            itemManager.updateItem(new ObjectId(), 150, "New Album", "Music");
+        });
+    }
 
-        Item updatedItem = itemManager.getItem(id);
-        assertNotNull(updatedItem);
-        assertEquals("tytus", updatedItem.getItemName());
+    @Test
+    void setAvailableTest() {
+        ObjectId itemId = itemManager.addItem(100, "Album", "Music");
+        itemManager.setAvailable(itemId);
+        Item item = itemManager.getItem(itemId);
+        Assertions.assertTrue(item.isAvailable());
+    }
+
+    @Test
+    void setUnavailableTest() {
+        ObjectId itemId = itemManager.addItem(100, "Album", "Music");
+        itemManager.setUnavailable(itemId);
+        Item item = itemManager.getItem(itemId);
+        Assertions.assertFalse(item.isAvailable());
+    }
+
+    @Test
+    void setAvailableInvalidIdTest() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            itemManager.setAvailable(new ObjectId());
+        });
+    }
+
+    @Test
+    void setUnavailableInvalidIdTest() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            itemManager.setUnavailable(new ObjectId());
+        });
     }
 }

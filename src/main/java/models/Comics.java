@@ -6,31 +6,14 @@ import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 @BsonDiscriminator("comics")
-public class Comics extends Item {
-    @BsonProperty("pages_number")
-    private int pagesNumber;
+public class Comics extends ItemType {
 
-    @BsonCreator
-    public Comics(
-            @BsonProperty("base_price") int basePrice,
-            @BsonProperty("item_name") String itemName,
-            @BsonProperty("pages_number") int pagesNumber
-    ) {
-        super(basePrice, itemName, true);
-        this.pagesNumber = pagesNumber;
+    public Comics() {
     }
 
     @BsonIgnore
     @Override
-    public String getItemInfo() {
-        return super.getItemInfo() + ", Pages: " + pagesNumber;
-    }
-
-    public int getPagesNumber() {
-        return pagesNumber;
-    }
-
-    public void setPagesNumber(Integer pagesNumber) {
-        this.pagesNumber = pagesNumber;
+    public String getItemTypeInfo() {
+        return "Comics.";
     }
 }

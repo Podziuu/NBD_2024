@@ -1,10 +1,7 @@
 package managers;
 
-import com.mongodb.client.MongoCollection;
-import exceptions.ItemAvailableException;
-import exceptions.ItemNotAvailableException;
-import exceptions.LogicException;
 import models.*;
+import org.bson.types.ObjectId;
 import repos.ItemRepository;
 
 public class ItemManager {
@@ -14,80 +11,66 @@ public class ItemManager {
         this.itemRepository = itemRepository;
     }
 
-    public long registerMusic(int basePrice, String itemName, boolean vinyl, MusicGenre genre)
-            throws ItemAvailableException, LogicException {
-        Music music = new Music(basePrice, itemName, vinyl, genre);
-        itemRepository.create(music);
-        return music.getItemId();
+    public ObjectId addItem(int basePrice, String itemName, String itemType) {
+        ItemType type = getItemType(itemType);
+        return itemRepository.addItem(new Item(basePrice, itemName, type));
     }
 
-    public long registerMovie(int basePrice, String itemName, int minutes, boolean casette) {
-        Movie movie = new Movie(basePrice, itemName, minutes, casette);
-        itemRepository.create(movie);
-        return movie.getItemId();
+    public Item getItem(ObjectId id) {
+        return itemRepository.getItem(id);
     }
 
-    public long registerComics(int basePrice, String itemName, int pagesNumber) {
-        Comics comics = new Comics(basePrice, itemName, pagesNumber);
-        itemRepository.create(comics);
-        return comics.getItemId();
-    }
-
-    public Item getItem(long itemId) {
-        return itemRepository.read(itemId);
-    }
-
-    public void deleteItem(long itemId) throws ItemNotAvailableException {
-        Item item = itemRepository.read(itemId);
-        if (item == null) {
-            throw new ItemNotAvailableException("itemu nie znaleziono");
+    public void updateItem(ObjectId id, int basePrice, String itemName, String itemType) {
+        if (itemRepository.getItem(id) == null) {
+            throw new NullPointerException("Item not found");
         }
-        itemRepository.delete(itemId);
-    }
-
-    public void updateItem(long id, int basePrice, String itemName,
-                           MusicGenre genre, Boolean vinyl,
-                           Integer minutes, Boolean casette,
-                           Integer pagesNumber) throws ItemNotAvailableException {
-
-        Item item = itemRepository.read(id);
-        if (item == null) {
-            throw new ItemNotAvailableException("itemu nie znaleziono");
-        }
-
+        Item item = itemRepository.getItem(id);
         item.setBasePrice(basePrice);
         item.setItemName(itemName);
+        item.setItemType(getItemType(itemType));
+        itemRepository.updateItem(item);
+    }
 
-        switch (item) {
-            case Music music -> {
-                if (genre != null) {
-                    music.setGenre(genre);
-                }
-                if (vinyl != null) {
-                    music.setVinyl(vinyl);
-                }
-            }
-            case Movie movie -> {
-                if (minutes != null) {
-                    movie.setMinutes(minutes);
-                }
-                if (casette != null) {
-                    movie.setCasette(casette);
-                }
-            }
-            case Comics comics -> {
-                if (pagesNumber != null) {
-                    comics.setPagesNumber(pagesNumber);
-                }
-            }
-            default -> {
-            }
+    public void removeItem(ObjectId id) {
+        if (itemRepository.getItem(id) == null) {
+            throw new NullPointerException("Item not found");
+        }
+        itemRepository.removeItem(id);
+    }
+
+    public void setAvailable(ObjectId id) {
+        Item item = itemRepository.getItem(id);
+        if (item == null) {
+            throw new NullPointerException("Item not found");
+        }
+        item.setAvailable(true);
+        itemRepository.updateItem(item);
+    }
+
+    public void setUnavailable(ObjectId id) {
+        Item item = itemRepository.getItem(id);
+        if (item == null) {
+            throw new NullPointerException("Item not found");
+        }
+        item.setAvailable(false);
+        itemRepository.updateItem(item);
+    }
+
+    private ItemType getItemType(String itemType) {
+        if (itemType == null || itemType.isEmpty()) {
+            throw new IllegalArgumentException("Item type cannot be null or empty");
         }
 
-        itemRepository.update(item);
-    }
-
-    public MongoCollection<Item> getAllItems() {
-        return itemRepository.getItems();
+        switch (itemType) {
+            case "Comics":
+                return new Comics();
+            case "Music":
+                return new Music();
+            case "Movie":
+                return new Movie();
+            default:
+                throw new IllegalArgumentException("Invalid item type: " + itemType);
+        }
     }
 }
+

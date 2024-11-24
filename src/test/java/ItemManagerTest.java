@@ -11,24 +11,13 @@ import org.junit.jupiter.api.Test;
 import repos.ItemRepository;
 
 public class ItemManagerTest {
-    private static MongoEntity mongoEntity;
-    private static MongoDatabase database;
-    private static MongoCollection<Item> itemCollection;
     private static ItemRepository itemRepository;
     private static ItemManager itemManager;
 
     @BeforeAll
     static void setUp() {
-        mongoEntity = new MongoEntity();
-        database = mongoEntity.getDatabase();
-        itemCollection = database.getCollection("items", Item.class);
-        itemRepository = new ItemRepository(itemCollection);
+        itemRepository = new ItemRepository();
         itemManager = new ItemManager(itemRepository);
-    }
-
-    @AfterAll
-    static void tearDown() throws Exception {
-        mongoEntity.close();
     }
 
     @Test

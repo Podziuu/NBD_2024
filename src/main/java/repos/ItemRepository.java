@@ -10,11 +10,12 @@ import config.MongoEntity;
 import models.Item;
 import org.bson.types.ObjectId;
 
-public class ItemRepository {
+public class ItemRepository extends AbstractMongoEntity {
     private final MongoCollection<Item> itemCollection;
 
-    public ItemRepository(MongoCollection<Item> itemCollection) {
-        this.itemCollection = itemCollection;
+    public ItemRepository() {
+        initDbConnection();
+        this.itemCollection = database.getCollection("items", Item.class);
     }
 
     public ObjectId addItem(Item item) {
@@ -37,5 +38,10 @@ public class ItemRepository {
         BasicDBObject object = new BasicDBObject();
         object.put("_id", id);
         itemCollection.deleteOne(object);
+    }
+
+    @Override
+    public void close() throws Exception {
+        mongoClient.close();
     }
 }

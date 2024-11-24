@@ -15,16 +15,10 @@ import repos.ClientRepository;
 import repos.ItemRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RentManagerTest {
-    private static MongoEntity mongoEntity;
-    private static MongoDatabase database;
-    private static MongoCollection<Rent> rentCollection;
-    private static MongoCollection<Client> clientCollection;
-    private static MongoCollection<Item> itemCollection;
     private static RentRepository rentRepository;
     private static ClientRepository clientRepository;
     private static ItemRepository itemRepository;
@@ -34,24 +28,13 @@ public class RentManagerTest {
 
     @BeforeAll
     static void setUp() {
-        mongoEntity = new MongoEntity();
-        database = mongoEntity.getDatabase();
-        rentCollection = database.getCollection("rents", Rent.class);
-        clientCollection = database.getCollection("clients", Client.class);
-        itemCollection = database.getCollection("items", Item.class);
-
-        rentRepository = new RentRepository(rentCollection);
-        clientRepository = new ClientRepository(clientCollection);
-        itemRepository = new ItemRepository(itemCollection);
+        rentRepository = new RentRepository();
+        clientRepository = new ClientRepository();
+        itemRepository = new ItemRepository();
 
         clientManager = new ClientManager(clientRepository);
         itemManager = new ItemManager(itemRepository);
         rentManager = new RentManager(rentRepository, clientManager, itemManager);
-    }
-
-    @AfterAll
-    static void tearDown() throws Exception {
-        mongoEntity.close();
     }
 
     @Test

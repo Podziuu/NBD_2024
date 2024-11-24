@@ -11,24 +11,13 @@ import org.junit.jupiter.api.Test;
 import repos.ClientRepository;
 
 public class ClientManagerTest {
-    private static MongoEntity mongoEntity;
-    private static MongoDatabase database;
-    private static MongoCollection<Client> clientCollection;
     private static ClientRepository clientRepository;
     private static ClientManager clientManager;
 
     @BeforeAll
     static void setUp() {
-        mongoEntity = new MongoEntity();
-        database = mongoEntity.getDatabase();
-        clientCollection = database.getCollection("clients", Client.class);
-        clientRepository = new ClientRepository(clientCollection);
+        clientRepository = new ClientRepository();
         clientManager = new ClientManager(clientRepository);
-    }
-
-    @AfterAll
-    static void tearDown() throws Exception {
-        mongoEntity.close();
     }
 
     @Test

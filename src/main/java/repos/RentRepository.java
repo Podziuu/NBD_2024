@@ -4,14 +4,16 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.InsertOneResult;
+import config.AbstractMongoEntity;
 import models.Rent;
 import org.bson.types.ObjectId;
 
-public class RentRepository {
+public class RentRepository extends AbstractMongoEntity {
     private final MongoCollection<Rent> rentCollection;
 
-    public RentRepository(MongoCollection<Rent> rentCollection) {
-        this.rentCollection = rentCollection;
+    public RentRepository() {
+        initDbConnection();
+        this.rentCollection = database.getCollection("rents", Rent.class);
     }
 
     public ObjectId addRent(Rent rent) {
@@ -34,5 +36,10 @@ public class RentRepository {
         BasicDBObject object = new BasicDBObject();
         object.put("_id", id);
         rentCollection.deleteOne(object);
+    }
+
+    @Override
+    public void close() throws Exception {
+        mongoClient.close();
     }
 }

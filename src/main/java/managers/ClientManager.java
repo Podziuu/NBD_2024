@@ -48,18 +48,15 @@ public class ClientManager {
             throw new NullPointerException("Client not found");
         }
         Client client = cachedClientRepository.getClient(id);
-        client.addRent(rentId);
         cachedClientRepository.addRentToClient(client, rentId);
     }
 
-    // TODO: Convert to cachedClientRepository
     public void removeRent(ObjectId id, ObjectId rentId) {
-        if (clientRepository.getClient(id) == null) {
+        if (cachedClientRepository.getClient(id) == null) {
             throw new NullPointerException("Client not found");
         }
-        Client client = clientRepository.getClient(id);
-        client.removeRent(rentId);
-        clientRepository.updateClient(client);
+        Client client = cachedClientRepository.getClient(id);
+        cachedClientRepository.removeRentFromClient(client, rentId);
     }
 
     public void removeClient(ObjectId id) {
@@ -74,7 +71,6 @@ public class ClientManager {
             throw new NullPointerException("Client not found");
         }
         Client client = cachedClientRepository.getClient(id);
-        client.setArchive(true);
         cachedClientRepository.archiveClient(client);
     }
 
@@ -83,7 +79,6 @@ public class ClientManager {
             throw new NullPointerException("Client not found");
         }
         Client client = cachedClientRepository.getClient(id);
-        client.setArchive(false);
         cachedClientRepository.unarchiveClient(client);
     }
 

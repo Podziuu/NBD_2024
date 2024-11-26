@@ -16,7 +16,7 @@ public class RedisClientRepository extends AbstractRedisRepository {
     }
 
     public void cacheClient(String key, String clientJson) {
-        pool.set(key, clientJson);
+        pool.setex(key, 900, clientJson);
     }
 
     public String getCachedClient(String key) {

@@ -1,11 +1,15 @@
 package models;
 
+import config.ObjectIdAdapter;
+import jakarta.json.bind.annotation.JsonbTransient;
+import jakarta.json.bind.annotation.JsonbTypeAdapter;
 import org.bson.codecs.pojo.annotations.*;
 import org.bson.types.ObjectId;
 
 @BsonDiscriminator("Item")
 public class Item {
     @BsonId
+    @JsonbTypeAdapter(ObjectIdAdapter.class)
     private ObjectId id;
     @BsonProperty("basePrice")
     protected int basePrice;
@@ -30,6 +34,7 @@ public class Item {
     }
 
     @BsonIgnore
+    @JsonbTransient
     public String getItemInfo() {
         return "Item ID: " + id + ", Name: " + itemName + ", Base Price: " + basePrice;
     }

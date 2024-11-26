@@ -1,5 +1,9 @@
 package models;
 
+import config.ObjectIdAdapter;
+import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
+import jakarta.json.bind.annotation.JsonbTypeAdapter;
 import org.bson.codecs.pojo.annotations.*;
 import org.bson.types.ObjectId;
 
@@ -8,6 +12,7 @@ import java.util.List;
 
 public class Client {
     @BsonId
+    @JsonbTypeAdapter(ObjectIdAdapter.class)
     private ObjectId id;
     @BsonProperty("personalId")
     private long personalID;
@@ -40,6 +45,7 @@ public class Client {
     }
 
     @BsonIgnore
+    @JsonbTransient
     public String getInfo() {
         return "Klient: \n Imię: " + firstName + "\n Nazwisko: " + lastName + "\n Pesel: " + personalID;
     }
@@ -77,6 +83,10 @@ public class Client {
 
     public long getPersonalId() {
         return personalID;
+    }
+
+    public void setPersonalId(long personalId) {
+        this.personalID = personalId;
     }
 
     public String getFirstName() {

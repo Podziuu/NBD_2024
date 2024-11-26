@@ -1,5 +1,7 @@
 package models;
 
+import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonDiscriminator;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
@@ -7,8 +9,10 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class ClientType {
     @BsonProperty("max_articles")
+    @JsonbProperty("maxArticles")
     protected int maxArticles;
     @BsonProperty("discount")
+    @JsonbProperty("discount")
     protected int discount;
 
     @BsonCreator
@@ -30,7 +34,16 @@ public class ClientType {
         return discount;
     }
 
+    public void setMaxArticles(int maxArticles) {
+        this.maxArticles = maxArticles;
+    }
+
+    public void setDiscount(int discount) {
+        this.discount = discount;
+    }
+
     @BsonIgnore
+    @JsonbTransient
     public String getClientTypeInfo() {
         return "\nMaksymalna ilość wypożyczonych artykułów: " + this.getMaxArticles();
     }

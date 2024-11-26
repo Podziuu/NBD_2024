@@ -1,6 +1,7 @@
 package managers;
 
 import org.bson.types.ObjectId;
+import repos.CachedClientRepository;
 import repos.ClientRepository;
 
 import models.Client;
@@ -10,6 +11,7 @@ import java.util.Map;
 
 public class ClientManager {
     private final ClientRepository clientRepository;
+    private final CachedClientRepository cachedClientRepository;
     private static final Map<String, ClientType> clientTypes = Map.of(
             "DiamondMembership", ClientType.createDiamondMembership(),
             "Membership", ClientType.createMembership(),
@@ -18,38 +20,39 @@ public class ClientManager {
 
     public ClientManager(ClientRepository clientRepository) {
         this.clientRepository = clientRepository;
+        this.cachedClientRepository = new CachedClientRepository();
     }
 
     public ObjectId addClient(String firstName, String lastName, long personalID, String clientType) {
         ClientType type = getClientType(clientType);
-        return clientRepository.addClient(new Client(personalID, firstName, lastName, type));
+        return cachedClientRepository.addClient(new Client(personalID, firstName, lastName, type));
     }
 
     public Client getClient(ObjectId id) {
-        return clientRepository.getClient(id);
+        return cachedClientRepository.getClient(id);
     }
 
     public void updateClient(ObjectId id, String firstName, String lastName, String clientType) {
-        if (clientRepository.getClient(id) == null) {
+        if (cachedClientRepository.getClient(id) == null) {
             throw new NullPointerException("Client not found");
         }
-        Client client = clientRepository.getClient(id);
+        Client client = cachedClientRepository.getClient(id);
         client.setFirstName(firstName);
         client.setLastName(lastName);
         client.setClientType(getClientType(clientType));
-        System.out.println(client.getInfo());
-        clientRepository.updateClient(client);
+        cachedClientRepository.updateClient(client);
     }
 
     public void addRent(ObjectId id, ObjectId rentId) {
-        if (clientRepository.getClient(id) == null) {
+        if (cachedClientRepository.getClient(id) == null) {
             throw new NullPointerException("Client not found");
         }
-        Client client = clientRepository.getClient(id);
+        Client client = cachedClientRepository.getClient(id);
         client.addRent(rentId);
-        clientRepository.addRentToClient(client.getId(), rentId);
+        cachedClientRepository.addRentToClient(client, rentId);
     }
 
+    // TODO: Convert to cachedClientRepository
     public void removeRent(ObjectId id, ObjectId rentId) {
         if (clientRepository.getClient(id) == null) {
             throw new NullPointerException("Client not found");
@@ -60,28 +63,28 @@ public class ClientManager {
     }
 
     public void removeClient(ObjectId id) {
-        if (clientRepository.getClient(id) == null) {
+        if (cachedClientRepository.getClient(id) == null) {
             throw new NullPointerException("Client not found");
         }
-        clientRepository.removeClient(id);
+        cachedClientRepository.removeClient(id);
     }
 
     public void archiveClient(ObjectId id) {
-        if (clientRepository.getClient(id) == null) {
+        if (cachedClientRepository.getClient(id) == null) {
             throw new NullPointerException("Client not found");
         }
-        Client client = clientRepository.getClient(id);
+        Client client = cachedClientRepository.getClient(id);
         client.setArchive(true);
-        clientRepository.updateClient(client);
+        cachedClientRepository.archiveClient(client);
     }
 
     public void unarchiveClient(ObjectId id) {
-        if (clientRepository.getClient(id) == null) {
+        if (cachedClientRepository.getClient(id) == null) {
             throw new NullPointerException("Client not found");
         }
-        Client client = clientRepository.getClient(id);
+        Client client = cachedClientRepository.getClient(id);
         client.setArchive(false);
-        clientRepository.updateClient(client);
+        cachedClientRepository.unarchiveClient(client);
     }
 
     private ClientType getClientType(String clientType) {

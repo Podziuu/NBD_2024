@@ -39,13 +39,28 @@ public class CachedClientRepository implements IClientRepository {
     @Override
     public void updateClient(Client client) {
         clientRepository.updateClient(client);
-        redisClientRepository.cacheClient(client.getId().toString(), jsonb.toJson(client));
+        redisClientRepository.cacheClient(generateCacheKey(client.getId()), jsonb.toJson(client));
     }
 
     @Override
     public void removeClient(ObjectId id) {
         clientRepository.removeClient(id);
-        redisClientRepository.removeCachedClient(id.toString());
+        redisClientRepository.removeCachedClient(generateCacheKey(id));
+    }
+
+    public void archiveClient(Client client) {
+        clientRepository.updateClient(client);
+        redisClientRepository.removeCachedClient(generateCacheKey(client.getId()));
+    }
+
+    public void unarchiveClient(Client client) {
+        clientRepository.updateClient(client);
+        redisClientRepository.cacheClient(generateCacheKey(client.getId()), jsonb.toJson(client));
+    }
+
+    public void addRentToClient(Client client, ObjectId rentId) {
+        clientRepository.addRentToClient(client.getId(), rentId);
+        redisClientRepository.cacheClient(generateCacheKey(client.getId()), jsonb.toJson(client));
     }
 
     private String generateCacheKey(ObjectId clientId) {

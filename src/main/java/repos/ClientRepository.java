@@ -43,14 +43,11 @@ public class ClientRepository extends AbstractMongoEntity implements IClientRepo
         clientCollection.deleteOne(object);
     }
 
-    public Client addRentToClient(ObjectId clientId, ObjectId rentId) {
+    public void addRentToClient(ObjectId clientId, ObjectId rentId) {
         clientCollection.updateOne(
                 Filters.eq("_id", clientId),
                 Updates.push("rents", rentId)
         );
-
-        Client updatedClient = clientCollection.find(Filters.eq("_id", clientId)).first();
-        return updatedClient;
     }
 
     @Override

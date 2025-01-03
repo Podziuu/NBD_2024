@@ -1,101 +1,75 @@
 package models;
 
-import exceptions.ParameterException;
-import jakarta.persistence.*;
+import com.datastax.oss.driver.api.mapper.annotations.*;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.UUID;
 
 @Entity
-@Table(name = "rents")
+@CqlName("rents")
 public class Rent {
+    @PartitionKey
+    @CqlName("rent_id")
+    private UUID id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @CqlName("begin_time")
+    private Instant beginTime;
 
-    @Column(name = "begin_time")
-    private LocalDateTime beginTime;
+    @CqlName("end_time")
+    private Instant endTime;
 
-    @Column(name = "end_time")
-    private LocalDateTime endTime;
-
-    @Column(name = "rent_cost")
+    @CqlName("rent_cost")
     private int rentCost;
 
-    @Column(name = "archive")
-    private boolean archive = false;
+    @CqlName("archive")
+    private boolean archive;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "client_id")
-    private Client client;
+    @CqlName("client_id")
+    private UUID clientId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "item_id")
-    private Item item;
+    @CqlName("item_id")
+    private UUID itemId;
+
+    public Rent(UUID id, Instant beginTime, UUID clientId, UUID itemId) {
+        this.id = id;
+        this.beginTime = beginTime;
+        this.clientId = clientId;
+        this.itemId = itemId;
+        this.archive = false;
+    }
 
     public Rent() {}
 
-    public Rent(LocalDateTime beginTime, Client client, Item item) throws ParameterException {
-        this.beginTime = (beginTime != null) ? beginTime : LocalDateTime.now();
-        this.client = client;
-        this.item = item;
-        this.item.setAvailable(false);
-    }
-
-    public void endRent(LocalDateTime endTime) {
-        if (this.endTime != null) {
-            return;
-        }
-
-        if (endTime == null || endTime.isBefore(beginTime)) {
-            this.endTime = beginTime;
-        } else {
-            this.endTime = endTime;
-        }
-
-        double cost = item.getActualPrice() * getRentDays();
-        this.rentCost = client.getClientType().applyDiscount((int) Math.round(cost));
-
-        this.item.setAvailable(true);
-    }
-
-    public long getRentDays() {
-        if (endTime == null) {
-            return 0;
-        }
-        Duration duration = Duration.between(beginTime, endTime);
-        long hours = duration.toHours();
-
-        return (hours % 24 == 0) ? hours / 24 : hours / 24 + 1;
-    }
-
-    public long getId() {
+    public UUID getId() {
         return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public Instant getBeginTime() {
+        return beginTime;
+    }
+
+    public void setBeginTime(Instant beginTime) {
+        this.beginTime = beginTime;
+    }
+
+    public Instant getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Instant endTime) {
+        this.endTime = endTime;
     }
 
     public int getRentCost() {
         return rentCost;
     }
 
-    public Client getClient() {
-        return client;
-    }
-
-    public Item getItem() {
-        return item;
-    }
-
-    public String getRentInfo() {
-        return "Rent ID: " + id + ", Client: " + client.getFirstName() + ", Item: " + item.getItemName();
-    }
-
-    public LocalDateTime getBeginTime() {
-        return beginTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
+    public void setRentCost(int rentCost) {
+        this.rentCost = rentCost;
     }
 
     public boolean isArchive() {
@@ -106,11 +80,27 @@ public class Rent {
         this.archive = archive;
     }
 
-    public void setClient(Client client) {
-        this.client = client;
+    public UUID getClientId() {
+        return clientId;
     }
 
-    public void setItem(Item item) {
-        this.item = item;
+    public void setClientId(UUID clientId) {
+        this.clientId = clientId;
+    }
+
+    public UUID getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(UUID itemId) {
+        this.itemId = itemId;
+    }
+
+    public long getRentDays() {
+        return java.time.Duration.between(beginTime, endTime).toDays();
+    }
+
+    public String getRentInfo() {
+        return "Rent ID: " + id + ", Client ID: " + clientId + ", Item ID: " + itemId;
     }
 }

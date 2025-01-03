@@ -2,62 +2,70 @@ package managers;
 
 import models.Client;
 import models.ClientType;
-
 import repos.ClientRepository;
 
-import exceptions.ClientExistsException;
-import exceptions.ClientNotExistsException;
+import java.util.Map;
+import java.util.UUID;
 
 public class ClientManager {
     private final ClientRepository clientRepository;
-    private final ClientTypeManager clientTypeManager;
+    private static final Map<String, ClientType> clientTypes = Map.of(
+            "DiamondMembership", ClientType.createDiamondMembership(),
+            "Membership", ClientType.createMembership(),
+            "NoMembership", ClientType.createNoMembership()
+    );
 
-    public ClientManager() {
-        this.clientRepository = new ClientRepository();
-        this.clientTypeManager = new ClientTypeManager();
+    public ClientManager(ClientRepository clientRepository) {
+        this.clientRepository = clientRepository;
     }
 
-    public long createClient(String firstName, String lastName, String clientType) {
-        ClientType type = clientTypeManager.getClientTypeByType(clientType);
-        return clientRepository.create(new Client(firstName, lastName, type));
+    public UUID addClient(String firstName, String lastName, long personalID, ClientType clientType) {
+        Client client = new Client(UUID.randomUUID(), personalID, firstName, lastName, clientType);
+        return clientRepository.addClient(client);
     }
 
-    public Client getClient(long id) {
-        return clientRepository.get(id);
-    }
-
-    public void deleteClient(long id) throws ClientNotExistsException {
-        if (clientRepository.get(id) == null) {
-            throw new ClientNotExistsException();
+    public Client getClient(UUID id) {
+        Client client = clientRepository.getClient(id);
+        if (client == null) {
+            throw new NullPointerException("Client not found");
         }
-        Client client = clientRepository.get(id);
-        clientRepository.delete(client);
+        return client;
     }
 
-    public void updateClient(long id, String firstName, String lastName, String clientType)
-            throws ClientNotExistsException {
-        if (clientRepository.get(id) == null) {
-            throw new ClientNotExistsException();
-        }
-        ClientType type = clientTypeManager.getClientTypeByType(clientType);
-        Client client = clientRepository.get(id);
+    public void updateClient(UUID id, String firstName, String lastName, ClientType clientType) {
+        Client client = getClient(id);
         client.setFirstName(firstName);
         client.setLastName(lastName);
-        client.setClientType(type);
-        clientRepository.update(client);
+        client.setClientType(clientType);
+        clientRepository.updateClient(client);
     }
 
-    public void archiveClient(long id) throws ClientNotExistsException {
-        if (clientRepository.get(id) == null) {
-            throw new ClientNotExistsException();
-        }
-        clientRepository.archive(id);
+    public void addRent(UUID clientId, UUID rentId) {
+        Client client = getClient(clientId);
+        client.addRent(rentId);
+        clientRepository.updateClient(client);
     }
 
-    public void unarchiveClient(long id) throws ClientNotExistsException {
-        if (clientRepository.get(id) == null) {
-            throw new ClientNotExistsException();
-        }
-        clientRepository.unarchive(id);
+    public void removeRent(UUID clientId, UUID rentId) {
+        Client client = getClient(clientId);
+        client.removeRent(rentId);
+        clientRepository.updateClient(client);
+    }
+
+    public void removeClient(UUID id) {
+        Client client = getClient(id);
+        clientRepository.removeClient(id);
+    }
+
+    public void archiveClient(UUID id) {
+        Client client = getClient(id);
+        client.setArchive(true);
+        clientRepository.updateClient(client);
+    }
+
+    public void unarchiveClient(UUID id) {
+        Client client = getClient(id);
+        client.setArchive(false);
+        clientRepository.updateClient(client);
     }
 }

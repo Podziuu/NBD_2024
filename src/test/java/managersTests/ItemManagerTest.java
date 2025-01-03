@@ -1,95 +1,140 @@
 package managersTests;
 
-import exceptions.ItemAvailableException;
-import exceptions.ItemNotAvailableException;
-import exceptions.LogicException;
-import managers.*;
+import managers.ItemManager;
 import models.*;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import com.datastax.oss.driver.api.core.CqlSession;
+import config.CassandraConfig;
+import repos.ItemRepository;
+import java.util.UUID;
 
 public class ItemManagerTest {
+
     private ItemManager itemManager;
+    private CassandraConfig cassandraConfig;
+    private CqlSession session;
+    private ItemRepository itemRepository;
 
     @BeforeEach
-    void setUp() {
-        itemManager = new ItemManager();
+    public void setUp() throws Exception {
+        cassandraConfig = new CassandraConfig();
+
+        session = cassandraConfig.getSession();
+        if (session == null) {
+            throw new IllegalStateException("CqlSession jest null. Sprawdź inicjalizację w CassandraConfig.");
+        }
+
+        itemRepository = new ItemRepository();
+        itemManager = new ItemManager(itemRepository);
+
+        session.execute("TRUNCATE mediastore.comics_items");
+        session.execute("TRUNCATE mediastore.movies");
+        session.execute("TRUNCATE mediastore.music_items");
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        if (cassandraConfig != null) {
+            cassandraConfig.close();
+        }
     }
 
     @Test
-    void registerMusicTest() throws ItemAvailableException, LogicException {
-        long id = itemManager.registerMusic(100, "Rock Album", MusicGenre.POP, true);
-        Item item = itemManager.getItem(id);
-        Assertions.assertNotNull(item);
-        Assertions.assertInstanceOf(Music.class, item);
-        Assertions.assertEquals("Rock Album", item.getItemName());
+    public void testAddMusic() {
+        String itemName = "Jazz Album";
+        int basePrice = 100;
+        MusicGenre genre = MusicGenre.Jazz;
+        boolean vinyl = true;
+
+        UUID itemId = itemManager.addMusic(basePrice, itemName, genre, vinyl);
+
+        Item item = itemRepository.getItem(itemId);
+        assertNotNull(item);
+        assertTrue(item instanceof Music);
+        Music music = (Music) item;
+        assertEquals(basePrice, music.getBasePrice());
+        assertEquals(itemName, music.getItemName());
+        assertEquals(genre, music.getGenre());
+        assertTrue(music.isVinyl());
     }
 
     @Test
-    void registerMovieTest() throws ItemAvailableException, LogicException {
-        long id = itemManager.registerMovie(200, "Skazani", 120, false);
-        Item item = itemManager.getItem(id);
-        Assertions.assertNotNull(item);
-        Assertions.assertInstanceOf(Movie.class, item);
-        Assertions.assertEquals("Skazani", item.getItemName());
-        Assertions.assertEquals(120, ((Movie) item).getMinutes());
+    public void testAddMovie() {
+        String itemName = "Action Movie";
+        int basePrice = 150;
+        int minutes = 120;
+        boolean casette = false;
+
+        UUID itemId = itemManager.addMovie(basePrice, itemName, minutes, casette);
+
+        Item item = itemRepository.getItem(itemId);
+        assertNotNull(item);
+        assertTrue(item instanceof Movie);
+        Movie movie = (Movie) item;
+        assertEquals(basePrice, movie.getBasePrice());
+        assertEquals(itemName, movie.getItemName());
+        assertEquals(minutes, movie.getMinutes());
+        assertFalse(movie.isCasette());
     }
 
     @Test
-    void registerComicsTest() throws ItemAvailableException, LogicException {
-        long id = itemManager.registerComics(50, "Superhero Comics", 150);
-        Item item = itemManager.getItem(id);
-        Assertions.assertNotNull(item);
-        Assertions.assertInstanceOf(Comics.class, item);
-        Assertions.assertEquals("Superhero Comics", item.getItemName());
-        Assertions.assertEquals(150, ((Comics) item).getPagesNumber());
+    public void testAddComics() {
+        String itemName = "Superhero Comics";
+        int basePrice = 80;
+        int pageNumber = 50;
+
+        UUID itemId = itemManager.addComics(basePrice, itemName, pageNumber);
+
+        Item item = itemRepository.getItem(itemId);
+        assertNotNull(item);
+        assertTrue(item instanceof Comics);
+        Comics comics = (Comics) item;
+        assertEquals(basePrice, comics.getBasePrice());
+        assertEquals(itemName, comics.getItemName());
+        assertEquals(pageNumber, comics.getPageNumber());
     }
 
     @Test
-    void deleteItemTest() throws ItemNotAvailableException, ItemAvailableException, LogicException {
-        long id = itemManager.registerMusic(100, "Rock Album", MusicGenre.POP, true);
-        Item item = itemManager.getItem(id);
-        itemManager.deleteItem(id);
-        Assertions.assertNull(itemManager.getItem(id));
+    public void testUpdateItem() {
+        UUID itemId = itemManager.addMusic(100, "Jazz Album", MusicGenre.Jazz, true);
+        itemManager.updateItem(itemId, 120, "Updated Jazz Album");
+
+        Item updatedItem = itemRepository.getItem(itemId);
+        assertNotNull(updatedItem);
+        assertEquals(120, updatedItem.getBasePrice());
+        assertEquals("Updated Jazz Album", updatedItem.getItemName());
     }
 
     @Test
-    void deleteItemNotAvailableTest() throws ItemAvailableException, LogicException {
-        Assertions.assertThrows(ItemNotAvailableException.class, () -> itemManager.deleteItem(512));
+    public void testRemoveItem() {
+        UUID itemId = itemManager.addMovie(150, "Action Movie", 120, false);
+        itemManager.removeItem(itemId);
+
+        Item removedItem = itemRepository.getItem(itemId);
+        assertNull(removedItem);
     }
 
     @Test
-    void updateMusicTest() throws ItemAvailableException, LogicException, ItemNotAvailableException {
-        long id = itemManager.registerMusic(100, "Rock Album", MusicGenre.POP, true);
-        itemManager.updateItem(id, 120, "Updated Rock Album", MusicGenre.Jazz, true,
-                null, null, null);
-        Item item = itemManager.getItem(id);
-        Assertions.assertInstanceOf(Music.class, item);
-        Assertions.assertEquals(120, item.getBasePrice());
-        Assertions.assertEquals("Updated Rock Album", item.getItemName());
-        Assertions.assertEquals(MusicGenre.Jazz, ((Music) item).getGenre());
+    public void testSetAvailable() {
+        UUID itemId = itemManager.addComics(80, "Superhero Comics", 50);
+        itemManager.setUnavailable(itemId);
+        itemManager.setAvailable(itemId);
+
+        Item item = itemRepository.getItem(itemId);
+        assertNotNull(item);
+        assertTrue(item.isAvailable());
     }
 
     @Test
-    void updateMovieTest() throws ItemNotAvailableException, ItemAvailableException, LogicException {
-        long id = itemManager.registerMovie(200, "Kiler", 120, false);
-        itemManager.updateItem(id, 220, "Updated Movie", null, null,
-                150,true, null);
-        Item item = itemManager.getItem(id);
-        Assertions.assertInstanceOf(Movie.class, item);
-        Assertions.assertEquals(220, item.getBasePrice());
-        Assertions.assertEquals("Updated Movie", item.getItemName());
-        Assertions.assertEquals(150, ((Movie) item).getMinutes());
-        Assertions.assertTrue(((Movie) item).isCasette());
-    }
+    public void testSetUnavailable() {
+        UUID itemId = itemManager.addMusic(100, "Jazz Album", MusicGenre.Jazz, true);
+        itemManager.setUnavailable(itemId);
 
-    @Test
-    void updateComicsTest() throws ItemAvailableException, LogicException, ItemNotAvailableException {
-        long id = itemManager.registerComics(50, "Superhero Comics", 150);
-        itemManager.updateItem(id, 60, "Updated Comics", null, null, null, null, 180);
-        Item item = itemManager.getItem(id);
-        Assertions.assertInstanceOf(Comics.class, item);
-        Assertions.assertEquals(60, item.getBasePrice());
-        Assertions.assertEquals("Updated Comics", item.getItemName());
-        Assertions.assertEquals(180, ((Comics) item).getPagesNumber());
+        Item item = itemRepository.getItem(itemId);
+        assertNotNull(item);
+        assertFalse(item.isAvailable());
     }
 }

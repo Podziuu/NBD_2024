@@ -1,29 +1,29 @@
 package models;
 
-import jakarta.persistence.*;
-
-import java.util.Objects;
+import com.datastax.oss.driver.api.mapper.annotations.*;
+import java.util.UUID;
 
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-@Table(name = "items")
+@CqlName("items")
 public class Item {
+    @PartitionKey
+    @CqlName("item_id")
+    private UUID id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @CqlName("base_price")
+    protected int basePrice;
 
-    @Column(name = "base_price")
-    private int basePrice;
+    @CqlName("item_name")
+    protected String itemName;
 
-    @Column(name = "item_name")
-    private String itemName;
-    private boolean available;
+    @CqlName("available")
+    protected boolean available;
 
-    @Version
-    private int version;
+    @CqlName("item_type")
+    protected String itemType;
 
-    public Item(int basePrice, String itemName) {
+    public Item(UUID id, int basePrice, String itemName) {
+        this.id = id;
         this.basePrice = basePrice;
         this.itemName = itemName;
         this.available = true;
@@ -31,15 +31,11 @@ public class Item {
 
     public Item() {}
 
-    public String getItemInfo() {
-        return "ID: " + id + ", Name: " + itemName + ", Base Price: " + basePrice + ", Available: " + available;
-    }
-
-    public long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -67,21 +63,19 @@ public class Item {
         this.available = available;
     }
 
-    public double getActualPrice() {
-        return this.getBasePrice();
+    public String getItemType() {
+        return itemType;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Item)) return false;
-        Item item = (Item) o;
-        return id == item.id;
-
+    public void setItemType(String itemType) {
+        this.itemType = itemType;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public String getItemInfo() {
+        return "Item ID: " + id + ", Name: " + itemName + ", Base Price: " + basePrice;
+    }
+
+    public int getActualPrice() {
+        return basePrice;
     }
 }

@@ -1,91 +1,87 @@
 package repos;
 
-import exceptions.LogicException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.Persistence;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.SimpleStatement;
+import config.CassandraConfig;
 import models.Rent;
-import models.Client;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
-public class RentRepository implements Repository<Rent> {
-    EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
+public class RentRepository extends CassandraConfig implements IRentRepository {
+    private final CqlSession session;
 
-    @Override
-    public long create(Rent rent) {
-        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            entityManager.getTransaction().begin();
-            entityManager.persist(rent);
-            entityManager.getTransaction().commit();
-            return rent.getId();
-        }
+    public RentRepository() {
+        this.session = getSession();
     }
 
     @Override
-    public Rent get(long id) {
-        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            return entityManager.find(Rent.class, id);
-        }
+    public UUID addRent(Rent rent) {
+        UUID rentId = UUID.randomUUID();
+        String cql = "INSERT INTO mediastore.rents (rent_id, begin_time, end_time, rent_cost, archive, client_id, item_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        SimpleStatement statement = SimpleStatement.newInstance(
+                cql,
+                rentId,
+                rent.getBeginTime(),
+                rent.getEndTime(),
+                rent.getRentCost(),
+                rent.isArchive(),
+                rent.getClientId(),
+                rent.getItemId()
+        );
+        session.execute(statement);
+        rent.setId(rentId);
+        return rentId;
     }
 
     @Override
-    public void update(Rent rent) {
-        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            entityManager.getTransaction().begin();
-            entityManager.merge(rent);
-            entityManager.getTransaction().commit();
+    public Rent getRent(UUID id) {
+        String cql = "SELECT * FROM mediastore.rents WHERE rent_id = ?";
+        SimpleStatement statement = SimpleStatement.newInstance(cql, id);
+        var resultSet = session.execute(statement);
+        var row = resultSet.one();
+
+        if (row != null) {
+            Rent rent = new Rent();
+            rent.setId(row.getUuid("rent_id"));
+            rent.setBeginTime(row.getInstant("begin_time"));
+            rent.setEndTime(row.getInstant("end_time"));
+            rent.setRentCost(row.getInt("rent_cost"));
+            rent.setArchive(row.getBoolean("archive"));
+            rent.setClientId(row.getUuid("client_id"));
+            rent.setItemId(row.getUuid("item_id"));
+            return rent;
         }
+        return null;
     }
 
     @Override
-    public void delete(Rent rent) {
-        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            entityManager.getTransaction().begin();
-            Rent managedRent = entityManager.find(Rent.class, rent.getId());
-            if (managedRent != null) {
-                entityManager.remove(managedRent);
-            }
-            entityManager.getTransaction().commit();
-        }
+    public void updateRent(Rent rent) {
+        String cql = "UPDATE mediastore.rents SET begin_time = ?, end_time = ?, rent_cost = ?, archive = ?, " +
+                "client_id = ?, item_id = ? WHERE rent_id = ?";
+        SimpleStatement statement = SimpleStatement.newInstance(
+                cql,
+                rent.getBeginTime(),
+                rent.getEndTime(),
+                rent.getRentCost(),
+                rent.isArchive(),
+                rent.getClientId(),
+                rent.getItemId(),
+                rent.getId()
+        );
+        session.execute(statement);
     }
 
-    public List<Rent> getActiveRentsByClient(Client client) {
-        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            return entityManager.createQuery("SELECT r FROM Rent r WHERE r.client = :client AND r.endTime IS NULL", Rent.class)
-                    .setParameter("client", client)
-                    .getResultList();
-        }
+    @Override
+    public void removeRent(UUID id) {
+        String cql = "DELETE FROM mediastore.rents WHERE rent_id = ?";
+        SimpleStatement statement = SimpleStatement.newInstance(cql, id);
+        session.execute(statement);
     }
 
-    public List<Rent> getAll() {
-        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            return entityManager.createQuery("SELECT r FROM Rent r", Rent.class)
-                    .getResultList();
-        }
-    }
-
-    public String report() {
-        StringBuilder report = new StringBuilder();
-        List<Rent> rents = getAll();
-        for (Rent rent : rents) {
-            report.append(rent.getRentInfo()).append("\n");
-        }
-        return report.toString();
-    }
-
-    public int getSize() {
-        return getAll().size();
-    }
-
-    public long countActiveRentsByClient(Client client) {
-        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            String query = "SELECT COUNT(r) FROM Rent r WHERE r.client = :client AND r.endTime IS NULL";
-            return entityManager.createQuery(query, Long.class)
-                    .setParameter("client", client)
-                    .getSingleResult();
+    public void close() throws Exception {
+        if (session != null) {
+            session.close();
         }
     }
 }

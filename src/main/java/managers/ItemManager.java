@@ -1,81 +1,71 @@
 package managers;
 
-import exceptions.LogicException;
 import models.*;
+import java.util.UUID;
 import repos.ItemRepository;
-import exceptions.ItemAvailableException;
-import exceptions.ItemNotAvailableException;
 
 public class ItemManager {
     private final ItemRepository itemRepository;
 
-    public ItemManager() {
-        this.itemRepository = new ItemRepository();
+    public ItemManager(ItemRepository itemRepository) {
+        this.itemRepository = itemRepository;
     }
 
-    public long registerMusic(int basePrice, String itemName, MusicGenre genre, boolean vinyl)
-            throws ItemAvailableException, LogicException {
-        Music music = new Music(basePrice, itemName, genre, vinyl);
-        return itemRepository.create(music);
+    public UUID addMusic(int basePrice, String itemName, MusicGenre genre, boolean vinyl) {
+        UUID id = UUID.randomUUID();
+        Music music = new Music(id, basePrice, itemName, genre, vinyl);
+        return itemRepository.addItem(music);
     }
 
-    public long registerMovie(int basePrice, String itemName, int minutes, boolean casette) {
-        Movie movie = new Movie(basePrice, itemName, minutes, casette);
-        return itemRepository.create(movie);
+    public UUID addMovie(int basePrice, String itemName, int minutes, boolean casette) {
+        UUID id = UUID.randomUUID();
+        Movie movie = new Movie(id, basePrice, itemName, minutes, casette);
+        return itemRepository.addItem(movie);
     }
 
-    public long registerComics(int basePrice, String itemName, int pagesNumber) {
-        Comics comics = new Comics(basePrice, itemName, pagesNumber);
-        return itemRepository.create(comics);
+    public UUID addComics(int basePrice, String itemName, int pageNumber) {
+        UUID id = UUID.randomUUID();
+        Comics comics = new Comics(id, basePrice, itemName, pageNumber);
+        return itemRepository.addItem(comics);
     }
 
-    public Item getItem(long itemId) {
-        return itemRepository.get(itemId);
+    public Item getItem(UUID id) {
+        return itemRepository.getItem(id);
     }
 
-    public void deleteItem(long itemId) throws ItemNotAvailableException {
-        if (itemRepository.get(itemId) == null) {
-            throw new ItemNotAvailableException();
-        }
-        Item item = itemRepository.get(itemId);
-        itemRepository.delete(item);
-    }
-
-    public void updateItem(long id, int basePrice, String itemName,
-                           MusicGenre genre, Boolean vinyl,
-                           Integer minutes, Boolean casette,
-                           Integer pagesNumber) throws ItemNotAvailableException {
-
-        Item item = itemRepository.get(id);
+    public void updateItem(UUID id, int basePrice, String itemName) {
+        Item item = itemRepository.getItem(id);
         if (item == null) {
-            throw new ItemNotAvailableException("Item not found.");
+            throw new NullPointerException("Item not found");
         }
-
         item.setBasePrice(basePrice);
         item.setItemName(itemName);
+        itemRepository.updateItem(item);
+    }
 
-        if (item instanceof Music) {
-            Music music = (Music) item;
-            if (genre != null) {
-                music.setGenre(genre);
-            }
-            if (vinyl != null) {
-                music.setVinyl(vinyl);
-            }
-        } else if (item instanceof Movie) {
-            Movie movie = (Movie) item;
-            if (minutes != null) {
-                movie.setMinutes(minutes);
-            }
-            if (casette != null) {
-                movie.setCasette(casette);
-            }
-        } else if (item instanceof Comics) {
-            Comics comics = (Comics) item;
-            if (pagesNumber != null) {
-                comics.setPagesNumber(pagesNumber);
-            }
+    public void removeItem(UUID id) {
+        Item item = itemRepository.getItem(id);
+        if (item == null) {
+            throw new NullPointerException("Item not found");
         }
-        itemRepository.update(item);
+        itemRepository.removeItem(id);
+    }
+
+    public void setAvailable(UUID id) {
+        Item item = itemRepository.getItem(id);
+        if (item == null) {
+            throw new NullPointerException("Item not found");
+        }
+        item.setAvailable(true);
+        itemRepository.updateItem(item);
+    }
+
+    public void setUnavailable(UUID id) {
+        Item item = itemRepository.getItem(id);
+        if (item == null) {
+            throw new NullPointerException("Item not found");
+        }
+        item.setAvailable(false);
+        itemRepository.updateItem(item);
     }
 }

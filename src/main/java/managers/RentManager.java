@@ -1,106 +1,86 @@
 package managers;
 
-import exceptions.ParameterException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.LockModeType;
-import jakarta.persistence.Persistence;
-import models.*;
-import repos.RentRepository;
+import models.Client;
+import models.ClientType;
+import models.Item;
+import models.Rent;
+import repos.IRentRepository;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.Instant;
+import java.util.UUID;
 
 public class RentManager {
+    private final IRentRepository rentRepository;
+    private final ClientManager clientManager;
+    private final ItemManager itemManager;
 
-    private EntityManagerFactory entityManagerFactory;
-    private RentRepository rentRepository;
-    private ClientTypeManager clientTypeManager;
-
-    public RentManager() {
-        this.entityManagerFactory = Persistence.createEntityManagerFactory("default");
-        this.rentRepository = new RentRepository();
-        this.clientTypeManager = new ClientTypeManager();
+    public RentManager(IRentRepository rentRepository, ClientManager clientManager, ItemManager itemManager) {
+        this.rentRepository = rentRepository;
+        this.clientManager = clientManager;
+        this.itemManager = itemManager;
     }
 
-    public Rent rentItem(LocalDateTime beginTime, Client client, Item item) throws ParameterException {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        entityManager.getTransaction().begin();
+    public UUID rentItem(Instant beginTime, UUID clientId, UUID itemId) {
+        Client client = clientManager.getClient(clientId);
+        Item item = itemManager.getItem(itemId);
+        ClientType clientType = client.getClientType();
 
-        try {
-            Client managedClient = entityManager.find(Client.class, client.getPersonalId(), LockModeType.OPTIMISTIC);
-            int maxRentals = getMaxRentalsForClient(managedClient.getClientType());
-            long activeRents = countActiveRentsByClient(managedClient, entityManager);
+        int max = clientType.getMaxArticles();
+        int rented = client.getRentsCount();
 
-            if (activeRents >= maxRentals) {
-                throw new ParameterException("Client has reached the maximum number of active rentals!");
-            }
-
-            Item managedItem = entityManager.find(Item.class, item.getId(), LockModeType.OPTIMISTIC);
-
-            if (!managedItem.isAvailable()) {
-                throw new ParameterException("Item is already rented!");
-            }
-
-            Rent rent = new Rent(beginTime, managedClient, managedItem);
-            rentRepository.create(rent);
-
-            managedItem.setAvailable(false);
-            entityManager.merge(managedItem);
-
-            entityManager.getTransaction().commit();
-            return rent;
-        } catch (Exception e) {
-            if (entityManager.getTransaction().isActive()) {
-                entityManager.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            entityManager.close();
+        if (rented >= max) {
+            throw new IllegalArgumentException("Client has reached the maximum number of rented items.");
         }
-    }
 
-    public void endRent(long rentId, LocalDateTime endTime) {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        if (!item.isAvailable()) {
+            throw new IllegalStateException("Item is already rented out.");
+        }
+
         try {
-            entityManager.getTransaction().begin();
-
-            Rent rent = entityManager.find(Rent.class, rentId);
-            rent.endRent(endTime);
-
-            Item item = rent.getItem();
-            item.setAvailable(true);
-            entityManager.merge(item);
-
-            entityManager.getTransaction().commit();
+            itemManager.setUnavailable(item.getId());
+            Rent rent = new Rent(UUID.randomUUID(), beginTime, client.getId(), item.getId());
+            UUID rentId = rentRepository.addRent(rent);
+            clientManager.addRent(client.getId(), rentId);
+            return rentId;
         } catch (Exception e) {
-            if (entityManager.getTransaction().isActive()) {
-                entityManager.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            entityManager.close();
+            throw new RuntimeException("Failed to rent item: " + e.getMessage(), e);
         }
     }
 
 
-    public List<Rent> getAllClientRents(Client client) {
-       return rentRepository.getActiveRentsByClient(client);
+
+    public void returnItem(UUID rentId) {
+        Rent rent = rentRepository.getRent(rentId);
+        if (rent == null) {
+            throw new IllegalArgumentException("Rent not found.");
+        }
+
+        try {
+            itemManager.setAvailable(rent.getItemId());
+            rent.setEndTime(Instant.now());
+            rent.setArchive(true);
+            rentRepository.updateRent(rent);
+            clientManager.removeRent(rent.getClientId(), rent.getId());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to return item: " + e.getMessage(), e);
+        }
     }
 
-    public Rent getRent(long rentId) {
-        return rentRepository.get(rentId);
+    public void removeRent(UUID rentId) {
+        Rent rent = rentRepository.getRent(rentId);
+        if (rent == null) {
+            throw new IllegalArgumentException("Rent not found.");
+        }
+
+        rentRepository.removeRent(rentId);
+        clientManager.removeRent(rent.getClientId(), rent.getId());
     }
 
-    private int getMaxRentalsForClient(ClientType clientType) {
-        return clientType.getMaxArticles();
-    }
-
-    public long countActiveRentsByClient(Client client, EntityManager entityManager) {
-        String query = "SELECT COUNT(r) FROM Rent r WHERE r.client = :client AND r.endTime IS NULL";
-
-        return entityManager.createQuery(query, Long.class)
-                .setParameter("client", client)
-                .getSingleResult();
+    public Rent getRent(UUID rentId) {
+        Rent rent = rentRepository.getRent(rentId);
+        if (rent == null) {
+            throw new IllegalArgumentException("Rent not found.");
+        }
+        return rent;
     }
 }

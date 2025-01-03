@@ -16,4 +16,13 @@ public enum MusicGenre {
     public int getValue() {
         return value;
     }
+
+    public static MusicGenre fromValue(int value) {
+        for (MusicGenre genre : MusicGenre.values()) {
+            if (genre.getValue() == value) {
+                return genre;
+            }
+        }
+        throw new IllegalArgumentException("unknown genre value: " + value);
+    }
 }

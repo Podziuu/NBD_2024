@@ -1,82 +1,81 @@
 package managersTests;
 
-import exceptions.ClientNotExistsException;
-import jakarta.persistence.NoResultException;
-import org.junit.jupiter.api.*;
-import managers.*;
-import models.*;
+import managers.ClientManager;
+import models.Client;
+import models.ClientType;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.datastax.oss.driver.api.core.CqlSession;
+import config.CassandraConfig;
+import repos.ClientRepository;
+
+import java.util.UUID;
 
 public class ClientManagerTest {
-    private ClientTypeManager clientTypeManager;
+
     private ClientManager clientManager;
+    private CassandraConfig cassandraConfig;
+    private CqlSession session;
+    private ClientRepository clientRepository;
 
     @BeforeEach
-    void setUp() {
-        clientTypeManager = new ClientTypeManager();
-        clientManager = new ClientManager();
-        clientTypeManager.createBasicClientTypes();
+    public void setUp() throws Exception {
+        cassandraConfig = new CassandraConfig();
+
+        session = cassandraConfig.getSession();
+        if (session == null) {
+            throw new IllegalStateException("CqlSession jest null. Sprawdź inicjalizację w CassandraConfig.");
+        }
+
+        clientRepository = new ClientRepository();
+        clientManager = new ClientManager(clientRepository);
+
+        session.execute("TRUNCATE mediastore.clients");
+    }
+
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        if (cassandraConfig != null) {
+            cassandraConfig.close();
+        }
     }
 
     @Test
-    void createClientTest() {
-        long id = clientManager.createClient("John", "Kowalski", "DiamondMembership");
-        Assertions.assertNotNull(clientManager.getClient(id));
+    public void testAddClient() {
+        String firstName = "John";
+        String lastName = "Doe";
+        long personalId = 123456789L;
+        ClientType clientType = ClientType.createDiamondMembership();
+        UUID clientId = clientManager.addClient(firstName, lastName, personalId, clientType);
+        Client client = clientRepository.getClient(clientId);
+        assertNotNull(client);
+        assertEquals(firstName, client.getFirstName());
+        assertEquals(lastName, client.getLastName());
+        assertEquals(personalId, client.getPersonalId());
+        assertEquals(clientType, client.getClientType());
+    }
+
+
+    @Test
+    public void testUpdateClient() {
+        UUID clientId = clientManager.addClient("John", "Doe", 123456789L, ClientType.createDiamondMembership());
+        clientManager.updateClient(clientId, "Jane", "Smith", ClientType.createNoMembership());
+        Client updatedClient = clientRepository.getClient(clientId);
+        assertNotNull(updatedClient);
+        assertEquals("Jane", updatedClient.getFirstName());
+        assertEquals("Smith", updatedClient.getLastName());
+        assertEquals(ClientType.createNoMembership(), updatedClient.getClientType());
     }
 
     @Test
-    void createClientInvalidTypeTest() {
-        Assertions.assertThrows(NoResultException.class, () -> clientManager.createClient("Joe", "Doe", "InvalidType"));
-    }
-
-    @Test
-    void deleteClientTest() throws ClientNotExistsException {
-        long id = clientManager.createClient("Robert", "Nowak", "Membership");
-        clientManager.deleteClient(id);
-        Assertions.assertNull(clientManager.getClient(id));
-    }
-
-    @Test
-    void deleteClientNotExistsTest() {
-        Assertions.assertThrows(ClientNotExistsException.class, () -> clientManager.deleteClient(55));
-    }
-
-    @Test
-    void updateClient() throws ClientNotExistsException {
-        long id = clientManager.createClient("Robert", "Nowak", "Membership");
-        clientManager.updateClient(id, "Robert", "Kowalski", "DiamondMembership");
-        Client client = clientManager.getClient(id);
-        Assertions.assertEquals("Robert", client.getFirstName());
-        Assertions.assertEquals("Kowalski", client.getLastName());
-        Assertions.assertEquals("Diamond Membership: 15 articles, discount: 30%", client.getClientType().getClientTypeInfo());
-    }
-
-    @Test
-    void updateClientNotExistsTest() {
-        Assertions.assertThrows(ClientNotExistsException.class, () -> clientManager.updateClient(55, "Robert", "Kowalski", "DiamondMembership"));
-    }
-
-    @Test
-    void archiveClientTest() throws ClientNotExistsException {
-        long id = clientManager.createClient("Robert", "Nowak", "Membership");
-        clientManager.archiveClient(id);
-        Assertions.assertTrue(clientManager.getClient(id).isArchive());
-    }
-
-    @Test
-    void archiveClientNotExistsTest() {
-        Assertions.assertThrows(ClientNotExistsException.class, () -> clientManager.archiveClient(55));
-    }
-
-    @Test
-    void unarchiveClientTest() throws ClientNotExistsException {
-        long id = clientManager.createClient("Robert", "Nowak", "Membership");
-        clientManager.archiveClient(id);
-        clientManager.unarchiveClient(id);
-        Assertions.assertFalse(clientManager.getClient(id).isArchive());
-    }
-
-    @Test
-    void unarchiveClientNotExistsTest() {
-        Assertions.assertThrows(ClientNotExistsException.class, () -> clientManager.unarchiveClient(55));
+    public void testRemoveClient() {
+        UUID clientId = clientManager.addClient("John", "Doe", 123456789L, ClientType.createDiamondMembership());
+        clientManager.removeClient(clientId);
+        assertNull(clientRepository.getClient(clientId));
     }
 }

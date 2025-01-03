@@ -1,86 +1,117 @@
 package models;
 
-import jakarta.persistence.*;
+import com.datastax.oss.driver.api.mapper.annotations.*;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
+@CqlName("clients")
 public class Client {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @PartitionKey
+    @CqlName("client_id")
+    private UUID id;
+
+    @CqlName("personal_id")
     private long personalID;
-    @Column(name = "first_name")
+
+    @CqlName("first_name")
     private String firstName;
-    @Column(name = "last_name")
+
+    @CqlName("last_name")
     private String lastName;
+
+    @CqlName("archive")
     private boolean archive;
-    @ManyToOne
+
+    @CqlName("client_type")
     private ClientType clientType;
 
-    @Version
-    private int version;
+    @CqlName("rents")
+    private List<UUID> rents;
 
-    public Client() {
-    }
-
-    public Client(String firstName, String lastName, ClientType clientType) {
+    public Client(UUID id, long personalID, String firstName, String lastName, ClientType clientType) {
+        this.id = id;
+        this.personalID = personalID;
         this.firstName = firstName;
         this.lastName = lastName;
         this.clientType = clientType;
+        this.archive = false;
+        this.rents = new ArrayList<>();
     }
 
-    public String getInfo() {
-        return "Klient: \n Imię: " + firstName + "\n Nazwisko: " + lastName + "\n Pesel: " + personalID;
+    public Client() {}
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public long getPersonalId() {
         return personalID;
     }
 
+    public void setPersonalId(long personalId) {
+        this.personalID = personalId;
+    }
+
     public String getFirstName() {
         return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setClientType(ClientType clientType) {
-        this.clientType = clientType;
-    }
-
-    public ClientType getClientType() {
-        return clientType;
     }
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setArchive(boolean archive) {
-        this.archive = archive;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public boolean isArchive() {
         return archive;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Client)) return false;
-        Client client = (Client) o;
-        return Objects.equals(personalID, client.personalID);
-
+    public void setArchive(boolean archive) {
+        this.archive = archive;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(personalID);
+    public ClientType getClientType() {
+        return clientType;
+    }
+
+    public void setClientType(ClientType clientType) {
+        this.clientType = clientType;
+    }
+
+    public List<UUID> getRents() {
+        return rents;
+    }
+
+    public void setRents(List<UUID> rents) {
+        this.rents = rents;
+    }
+
+    public void addRent(UUID rent) {
+        this.rents.add(rent);
+    }
+
+    public void removeRent(UUID rent) {
+        this.rents.remove(rent);
+    }
+
+    public int getRentsCount() {
+        return rents.size();
+    }
+
+    public String getInfo() {
+        return "Klient: \nImię: " + firstName + "\nNazwisko: " + lastName + "\nPesel: " + personalID;
     }
 }

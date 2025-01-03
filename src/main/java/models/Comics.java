@@ -1,31 +1,27 @@
 package models;
 
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import com.datastax.oss.driver.api.mapper.annotations.*;
+import java.util.UUID;
 
 @Entity
-@DiscriminatorValue("Comics")
+@CqlName("comics_items")
 public class Comics extends Item {
+    @CqlName("page_number")
+    private int pageNumber;
 
-    private int pagesNumber;
-
-    public Comics(int basePrice, String itemName, int pagesNumber) {
-        super(basePrice, itemName);
-        this.pagesNumber = pagesNumber;
+    public Comics(UUID id, int basePrice, String itemName, int pageNumber) {
+        super(id, basePrice, itemName);
+        this.itemType = "comics";
+        this.pageNumber = pageNumber;
     }
 
     public Comics() {}
 
-    @Override
-    public String getItemInfo() {
-        return super.getItemInfo() + ", Pages: " + pagesNumber;
+    public int getPageNumber() {
+        return pageNumber;
     }
 
-    public int getPagesNumber() {
-        return pagesNumber;
-    }
-
-    public void setPagesNumber(int pagesNumber) {
-        this.pagesNumber = pagesNumber;
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
     }
 }

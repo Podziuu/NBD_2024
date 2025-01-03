@@ -1,49 +1,83 @@
 package models;
 
-import jakarta.persistence.*;
+import java.util.Objects;
 
-@Entity
-@Table(name = "client_types")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "dtype")
 public class ClientType {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    @Column(name = "max_articles")
-    protected int maxArticles;
-    protected int discount;
-    @Column(name = "type_name")
-    protected String typeName;
-    @Version
-    private int version;
+    private int maxArticles;
+    private int discount;
 
-    public ClientType() {
-    }
-
-    public ClientType(String typeName, int maxArticles, int discount) {
-        this.typeName = typeName;
+    public ClientType(int maxArticles, int discount) {
         this.maxArticles = maxArticles;
         this.discount = discount;
-    }
-
-    public long getId() {
-        return id;
     }
 
     public int getMaxArticles() {
         return maxArticles;
     }
 
+    public static ClientType fromString(String clientTypeString) {
+        switch (clientTypeString) {
+            case "DiamondMembership":
+                return ClientType.createDiamondMembership();
+            case "Membership":
+                return ClientType.createMembership();
+            case "NoMembership":
+                return ClientType.createNoMembership();
+            default:
+                throw new IllegalArgumentException("Invalid client type");
+        }
+    }
+
+    @Override
+    public String toString() {
+        if (this.maxArticles == 15 && this.discount == 30) {
+            return "DiamondMembership";
+        } else if (this.maxArticles == 10 && this.discount == 20) {
+            return "Membership";
+        } else if (this.maxArticles == 2 && this.discount == 0) {
+            return "NoMembership";
+        }
+        return "Unknown";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        ClientType that = (ClientType) obj;
+        return this.maxArticles == that.maxArticles && this.discount == that.discount;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(maxArticles, discount);
+    }
+
+    public void setMaxArticles(int maxArticles) {
+        this.maxArticles = maxArticles;
+    }
+
+    public int getDiscount() {
+        return discount;
+    }
+
     public void setDiscount(int discount) {
         this.discount = discount;
     }
 
-    public int applyDiscount(int price) {
-        return price - (price * discount / 100);
+    public static ClientType createDiamondMembership() {
+        return new ClientType(15, 30);
     }
 
-    public String getClientTypeInfo() {
-        return "typeName" + ": " + maxArticles + " articles, discount: " + discount + "%";
+    public static ClientType createMembership() {
+        return new ClientType(10, 20);
+    }
+
+    public static ClientType createNoMembership() {
+        return new ClientType(2, 0);
     }
 }

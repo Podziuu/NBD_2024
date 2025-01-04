@@ -41,7 +41,7 @@ public class RentManagerTest {
             throw new IllegalStateException("CqlSession jest null. Sprawdź inicjalizację w CassandraConfig.");
         }
 
-        clientRepository = new ClientRepository();
+        clientRepository = new ClientRepository(session);
         itemRepository = new ItemRepository();
         clientManager = new ClientManager(clientRepository);
         itemManager = new ItemManager(itemRepository);

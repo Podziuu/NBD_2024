@@ -1,94 +1,57 @@
 package repos;
 
+import com.datastax.oss.driver.api.core.CqlIdentifier;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
+import com.datastax.oss.driver.api.core.type.DataTypes;
+import com.datastax.oss.driver.api.querybuilder.SchemaBuilder;
 import config.CassandraConfig;
+import dao.ClientDao;
+import mapper.ClientMapper;
+import mapper.ClientMapperBuilder;
 import models.*;
 
-import java.util.List;
 import java.util.UUID;
 
 public class ClientRepository extends CassandraConfig implements IClientRepository {
     private final CqlSession session;
+    private final ClientMapper clientMapper;
+    private final ClientDao clientDao;
 
-    public ClientRepository() {
-        this.session = getSession();
+    public ClientRepository(CqlSession session) {
+        this.session = session;
+        createTable();
+        this.clientMapper = new ClientMapperBuilder(session).build();
+        this.clientDao = clientMapper.clientDao();
     }
 
-    @Override
-    public UUID addClient(Client client) {
-        UUID id = UUID.randomUUID();
-        String clientTypeString = client.getClientType().toString();
-
-        String cql = "INSERT INTO mediastore.clients (client_id, personal_id, first_name, last_name, archive, client_type, rents) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-        SimpleStatement statement = SimpleStatement.newInstance(
-                cql,
-                id,
-                client.getPersonalId(),
-                client.getFirstName(),
-                client.getLastName(),
-                client.isArchive(),
-                clientTypeString,
-                client.getRents()
-        );
-
-        session.execute(statement);
-        client.setId(id);
-        return id;
+    public void createTable() {
+        SimpleStatement createClients = SchemaBuilder.createTable(CqlIdentifier.fromCql("clients_by_id"))
+                .ifNotExists()
+                .withPartitionKey(CqlIdentifier.fromCql("id"), DataTypes.UUID)
+                .withColumn("personal_id", DataTypes.BIGINT)
+                .withColumn("first_name", DataTypes.TEXT)
+                .withColumn("last_name", DataTypes.TEXT)
+                .withColumn("archive", DataTypes.BOOLEAN)
+                .withColumn("client_type", DataTypes.TEXT)
+                .build();
+        session.execute(createClients);
     }
 
+    public void addClient(Client client) {
+        clientDao.create(client);
+    }
 
-    @Override
     public Client getClient(UUID id) {
-        String cql = "SELECT * FROM mediastore.clients WHERE client_id = ?";
-        SimpleStatement statement = SimpleStatement.newInstance(cql, id);
-        var resultSet = session.execute(statement);
-        var row = resultSet.one();
-
-        if (row != null) {
-            Client client = new Client();
-            client.setId(row.getUuid("client_id"));
-            client.setPersonalId(row.getLong("personal_id"));
-            client.setFirstName(row.getString("first_name"));
-            client.setLastName(row.getString("last_name"));
-            client.setArchive(row.getBoolean("archive"));
-            String clientTypeString = row.getString("client_type");
-            client.setClientType(ClientType.fromString(clientTypeString));
-            client.setRents(row.getList("rents", UUID.class));
-            return client;
-        }
-        return null;
+        return clientDao.read(id);
     }
 
-    @Override
     public void updateClient(Client client) {
-        String cql = "UPDATE mediastore.clients SET personal_id = ?, first_name = ?, last_name = ?, archive = ?, client_type = ?, rents = ? WHERE client_id = ?";
-        SimpleStatement statement = SimpleStatement.newInstance(
-                cql,
-                client.getPersonalId(),
-                client.getFirstName(),
-                client.getLastName(),
-                client.isArchive(),
-                client.getClientType(),
-                client.getRents(),
-                client.getId()
-        );
-        session.execute(statement);
+        clientDao.update(client);
     }
 
-    @Override
     public void removeClient(UUID id) {
-        String cql = "DELETE FROM mediastore.clients WHERE client_id = ?";
-        SimpleStatement statement = SimpleStatement.newInstance(cql, id);
-        session.execute(statement);
-    }
-
-    public void addRentToClient(UUID clientId, UUID rentId) {
-        String cql = "UPDATE mediastore.clients SET rents = rents + ? WHERE client_id = ?";
-        List<UUID> rents = List.of(rentId);
-        SimpleStatement statement = SimpleStatement.newInstance(cql, rents, clientId);
-        session.execute(statement);
+        clientDao.deleteById(id);
     }
 
     @Override

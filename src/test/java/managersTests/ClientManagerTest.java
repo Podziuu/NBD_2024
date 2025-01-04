@@ -31,19 +31,19 @@ public class ClientManagerTest {
             throw new IllegalStateException("CqlSession jest null. Sprawdź inicjalizację w CassandraConfig.");
         }
 
-        clientRepository = new ClientRepository();
+        clientRepository = new ClientRepository(session);
         clientManager = new ClientManager(clientRepository);
 
         session.execute("TRUNCATE mediastore.clients");
     }
 
 
-    @AfterEach
-    public void tearDown() throws Exception {
-        if (cassandraConfig != null) {
-            cassandraConfig.close();
-        }
-    }
+//    @AfterEach
+//    public void tearDown() throws Exception {
+//        if (cassandraConfig != null) {
+//            cassandraConfig.close();
+//        }
+//    }
 
     @Test
     public void testAddClient() {

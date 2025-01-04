@@ -21,7 +21,8 @@ public class ClientManager {
 
     public UUID addClient(String firstName, String lastName, long personalID, ClientType clientType) {
         Client client = new Client(UUID.randomUUID(), personalID, firstName, lastName, clientType);
-        return clientRepository.addClient(client);
+        clientRepository.addClient(client);
+        return client.getId();
     }
 
     public Client getClient(UUID id) {

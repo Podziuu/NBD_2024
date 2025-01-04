@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@CqlName("clients")
+@CqlName("clients_by_id")
 public class Client {
     @PartitionKey
     @CqlName("client_id")
@@ -25,6 +25,7 @@ public class Client {
     @CqlName("archive")
     private boolean archive;
 
+    @ClusteringColumn(0)
     @CqlName("client_type")
     private ClientType clientType;
 

@@ -28,12 +28,14 @@ public class ClientRepository extends CassandraConfig implements IClientReposito
     public void createTable() {
         SimpleStatement createClients = SchemaBuilder.createTable(CqlIdentifier.fromCql("clients_by_id"))
                 .ifNotExists()
-                .withPartitionKey(CqlIdentifier.fromCql("id"), DataTypes.UUID)
+                .withPartitionKey(CqlIdentifier.fromCql("client_id"), DataTypes.UUID)
+                .withClusteringColumn(CqlIdentifier.fromCql("client_type"), DataTypes.TEXT)
                 .withColumn("personal_id", DataTypes.BIGINT)
                 .withColumn("first_name", DataTypes.TEXT)
                 .withColumn("last_name", DataTypes.TEXT)
                 .withColumn("archive", DataTypes.BOOLEAN)
-                .withColumn("client_type", DataTypes.TEXT)
+                .withColumn("rents", DataTypes.listOf(DataTypes.UUID))
+                .withColumn("discriminator", DataTypes.TEXT)
                 .build();
         session.execute(createClients);
     }

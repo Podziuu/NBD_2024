@@ -34,7 +34,7 @@ public class ClientManagerTest {
         clientRepository = new ClientRepository(session);
         clientManager = new ClientManager(clientRepository);
 
-        session.execute("TRUNCATE mediastore.clients");
+        session.execute("TRUNCATE mediastore.clients_by_id");
     }
 
 

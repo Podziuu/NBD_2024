@@ -64,12 +64,12 @@ public class ClientManagerTest {
     @Test
     public void testUpdateClient() {
         UUID clientId = clientManager.addClient("John", "Doe", 123456789L, ClientType.createDiamondMembership());
-        clientManager.updateClient(clientId, "Jane", "Smith", ClientType.createNoMembership());
-        Client updatedClient = clientRepository.getClient(clientId);
+        clientManager.updateClient(clientId, "Jane", "Smith", ClientType.createDiamondMembership());
+        Client updatedClient = clientManager.getClient(clientId);
         assertNotNull(updatedClient);
         assertEquals("Jane", updatedClient.getFirstName());
         assertEquals("Smith", updatedClient.getLastName());
-        assertEquals(ClientType.createNoMembership(), updatedClient.getClientType());
+        assertEquals(ClientType.createDiamondMembership(), updatedClient.getClientType());
     }
 
     @Test

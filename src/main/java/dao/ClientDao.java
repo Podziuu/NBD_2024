@@ -15,7 +15,7 @@ public interface ClientDao {
     @Query("SELECT * FROM mediastore.clients_by_id WHERE client_id = :client_id")
     Client read(@CqlName("client_id") UUID client_id);
 
-    @Insert
+    @Update
     void update(Client client);
 
     @Query("DELETE FROM mediastore.clients_by_id WHERE client_id = :id")

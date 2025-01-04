@@ -42,6 +42,7 @@ public class CassandraConfig implements AutoCloseable {
         createComicsItemsTableIfNotExists();
         createMoviesTableIfNotExists();
         createMusicItemsTableIfNotExists();
+        createRentsTableIfNotExists();
     }
 
     private void createKeyspace() {
@@ -117,6 +118,27 @@ public class CassandraConfig implements AutoCloseable {
             e.printStackTrace();
         }
     }
+
+    private void createRentsTableIfNotExists() {
+        String createRentsTableQuery = "CREATE TABLE IF NOT EXISTS mediastore.rents ("
+                + "rent_id UUID PRIMARY KEY, "
+                + "begin_time TIMESTAMP, "
+                + "end_time TIMESTAMP, "
+                + "rent_cost INT, "
+                + "archive BOOLEAN, "
+                + "client_id UUID, "
+                + "item_id UUID"
+                + ");";
+
+        try {
+            SimpleStatement statement = SimpleStatement.newInstance(createRentsTableQuery);
+            session.execute(statement);
+        } catch (Exception e) {
+            System.err.println("Błąd podczas tworzenia tabeli 'rents': " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 
     private void createMusicItemsTableIfNotExists() {
         String createMusicItemsTableQuery = "CREATE TABLE IF NOT EXISTS mediastore.music_items ("

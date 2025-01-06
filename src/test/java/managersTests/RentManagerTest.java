@@ -42,7 +42,7 @@ public class RentManagerTest {
         }
 
         clientRepository = new ClientRepository(session);
-        itemRepository = new ItemRepository();
+        itemRepository = new ItemRepository(session);
         clientManager = new ClientManager(clientRepository);
         itemManager = new ItemManager(itemRepository);
         rentRepository = new RentRepository();

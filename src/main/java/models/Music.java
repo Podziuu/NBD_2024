@@ -5,7 +5,7 @@ import com.datastax.oss.driver.api.mapper.annotations.*;
 import java.util.UUID;
 
 @Entity
-@CqlName("music_items")
+@CqlName("items_by_id")
 public class Music extends Item {
     @CqlName("genre")
     private int genreValue;
@@ -30,8 +30,8 @@ public class Music extends Item {
         return MusicGenre.fromValue(genreValue);
     }
 
-    public void setGenre(MusicGenre genre) {
-        this.genreValue = genre.getValue();
+    public void setGenre(int genreValue) {
+        this.genreValue = genreValue;
     }
 
     public boolean isVinyl() {

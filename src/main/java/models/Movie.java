@@ -5,7 +5,7 @@ import com.datastax.oss.driver.api.mapper.annotations.*;
 import java.util.UUID;
 
 @Entity
-@CqlName("movies")
+@CqlName("items_by_id")
 public class Movie extends Item {
 
     @CqlName("minutes")

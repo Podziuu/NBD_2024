@@ -29,6 +29,7 @@ public class CassandraConfig implements AutoCloseable {
                 .addContactPoint(new InetSocketAddress("cassandra1", 9042))
                 .addContactPoint(new InetSocketAddress("cassandra2", 9043))
                 .addTypeCodecs(new ClientTypeCodec())
+                .addTypeCodecs(new MusicGenreCodec())
                 .withAuthCredentials("cassandra", "cassandra")
                 .withLocalDatacenter("dc1")
                 .withKeyspace(CqlIdentifier.fromCql("mediastore"))

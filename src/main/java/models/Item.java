@@ -4,7 +4,7 @@ import com.datastax.oss.driver.api.mapper.annotations.*;
 import java.util.UUID;
 
 @Entity
-@CqlName("items")
+@CqlName("items_by_id")
 public class Item {
     @PartitionKey
     @CqlName("item_id")
@@ -19,6 +19,7 @@ public class Item {
     @CqlName("available")
     protected boolean available;
 
+    @ClusteringColumn(0)
     @CqlName("item_type")
     protected String itemType;
 

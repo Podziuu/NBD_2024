@@ -7,8 +7,9 @@ import java.util.UUID;
 @Entity
 @CqlName("items_by_id")
 public class Music extends Item {
+
     @CqlName("genre")
-    private int genreValue;
+    private String genreString;
 
     @CqlName("vinyl")
     private boolean vinyl;
@@ -16,22 +17,18 @@ public class Music extends Item {
     public Music(UUID id, int basePrice, String itemName, MusicGenre genre, boolean vinyl) {
         super(id, basePrice, itemName);
         this.itemType = "music";
-        this.genreValue = genre.getValue();
+        this.genreString = genre.name();
         this.vinyl = vinyl;
     }
 
     public Music() {}
 
-    public int getGenreValue() {
-        return genreValue;
-    }
-
     public MusicGenre getGenre() {
-        return MusicGenre.fromValue(genreValue);
+        return MusicGenre.valueOf(genreString);
     }
 
-    public void setGenre(int genreValue) {
-        this.genreValue = genreValue;
+    public void setGenre(MusicGenre genre) {
+        this.genreString = genre.name();
     }
 
     public boolean isVinyl() {

@@ -42,7 +42,16 @@ public class ItemRepository extends CassandraConfig {
     }
 
     public void addItem(Item item) {
-        itemDao.create(item);
+        if (item instanceof Music) {
+//            System.out.println(            ((Music) item).getGenreV());
+            itemDao.create((Music) item);
+        } else if (item instanceof Movie) {
+            itemDao.create((Movie) item);
+        } else if (item instanceof Comics) {
+            itemDao.create((Comics) item);
+        } else {
+            throw new IllegalArgumentException("Nieznany typ obiektu: " + item.getClass().getName());
+        }
     }
 
     public Item getItem(UUID id) {

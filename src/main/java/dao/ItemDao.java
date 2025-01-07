@@ -12,7 +12,13 @@ import java.util.UUID;
 public interface ItemDao {
 
     @Insert
-    void create(Item item);
+    void create(Music music);
+
+    @Insert
+    void create(Movie movie);
+
+    @Insert
+    void create(Comics comics);
 
     @Query("SELECT * FROM mediastore.items_by_id WHERE item_id = :id")
     Item read(@CqlName("id") UUID id);

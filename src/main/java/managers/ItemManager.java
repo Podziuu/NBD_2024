@@ -15,16 +15,13 @@ public class ItemManager {
     public UUID addMusic(int basePrice, String itemName, MusicGenre genre, boolean vinyl) {
         UUID id = UUID.randomUUID();
         Music music = new Music(id, basePrice, itemName, genre, vinyl);
-        //music.setItemType("music");
         itemRepository.addItem(music);
-        System.out.println(music.getId());
         return music.getId();
     }
 
     public UUID addMovie(int basePrice, String itemName, int minutes, boolean casette) {
         UUID id = UUID.randomUUID();
         Movie movie = new Movie(id, basePrice, itemName, minutes, casette);
-        movie.setItemType("movie");
         itemRepository.addItem(movie);
         return movie.getId();
     }
@@ -32,7 +29,6 @@ public class ItemManager {
     public UUID addComics(int basePrice, String itemName, int pageNumber) {
         UUID id = UUID.randomUUID();
         Comics comics = new Comics(id, basePrice, itemName, pageNumber);
-        comics.setItemType("comics");
         itemRepository.addItem(comics);
         return comics.getId();
     }

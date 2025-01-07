@@ -8,6 +8,7 @@ import repos.IRentRepository;
 import repos.RentRepository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public class RentManager {
@@ -22,17 +23,12 @@ public class RentManager {
     }
 
     public UUID rentItem(Instant beginTime, UUID clientId, UUID itemId) {
+        if (clientManager.hasReachedRentalLimit(clientId)) {
+            throw new IllegalArgumentException("Client has reached the maximum number of rented items.");
+        }
+
         Client client = clientManager.getClient(clientId);
         Item item = itemManager.getItem(itemId);
-        ClientType clientType = client.getClientType();
-
-        int max = clientType.getMaxArticles();
-        // TODO: Zrobic w repo metode ktora zwroci nam ile dany klient ma rentow
-//        int rented = client.getRentsCount();
-//
-//        if (rented >= max) {
-//            throw new IllegalArgumentException("Client has reached the maximum number of rented items.");
-//        }
 
         if (!item.isAvailable()) {
             throw new IllegalStateException("Item is already rented out.");
@@ -42,14 +38,11 @@ public class RentManager {
             itemManager.setUnavailable(item.getId());
             Rent rent = new Rent(UUID.randomUUID(), beginTime, client.getId(), item.getId());
             rentRepository.addRent(rent);
-//            clientManager.addRent(client.getId(), rent.getId());
             return rent.getId();
         } catch (Exception e) {
             throw new RuntimeException("Failed to rent item: " + e.getMessage(), e);
         }
     }
-
-
 
     public void returnItem(UUID rentId) {
         Rent rent = rentRepository.getRentByRentId(rentId);
@@ -61,8 +54,7 @@ public class RentManager {
             itemManager.setAvailable(rent.getItemId());
             rent.setEndTime(Instant.now());
             rent.setArchive(true);
-            rentRepository.updateRent(rent);
-//            clientManager.removeRent(rent.getClientId(), rent.getId());
+            rentRepository.updateRentByRentId(rent);
         } catch (Exception e) {
             throw new RuntimeException("Failed to return item: " + e.getMessage(), e);
         }
@@ -75,7 +67,6 @@ public class RentManager {
         }
 
         rentRepository.removeRent(rentId);
-//        clientManager.removeRent(rent.getClientId(), rent.getId());
     }
 
     public Rent getRent(UUID rentId) {
@@ -84,5 +75,13 @@ public class RentManager {
             throw new IllegalArgumentException("Rent not found.");
         }
         return rent;
+    }
+
+    public List<Rent> getRentByClientId(UUID clientId) {
+        List<Rent> rents = rentRepository.getRentByClientId(clientId);
+        if (rents.isEmpty()) {
+            throw new IllegalArgumentException("No rents found for the given client ID.");
+        }
+        return rents;
     }
 }

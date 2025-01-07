@@ -11,7 +11,6 @@ import mapper.RentMapper;
 import mapper.RentMapperBuilder;
 import models.Rent;
 
-import javax.xml.crypto.Data;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,9 +69,15 @@ public class RentRepository extends CassandraConfig {
         return rentDao.readByClientId(id);
     }
 
-    public void updateRent(Rent rent) {
-//        rentDao.update(rent);
+    public void updateRentByRentId(Rent rent) {
+        rentDao.updateRentByRentId(rent.getId(),
+                rent.getBeginTime(), rent.getEndTime(),
+                rent.getRentCost(), rent.isArchive(), rent.getItemId());
     }
+
+//    public void updateRentByClientId(UUID clientId, UUID rentId, Instant beginTime, Instant endTime, int rentCost, boolean archive, UUID itemId) {
+//        rentDao.updateRentByClientId(clientId, rentId, beginTime, endTime, rentCost, archive, itemId);
+//    }
 
     public void removeRent(UUID id) {
         rentDao.deleteByRentId(id);

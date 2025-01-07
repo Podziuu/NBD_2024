@@ -3,20 +3,23 @@ package managers;
 import models.Client;
 import models.ClientType;
 import repos.ClientRepository;
+import repos.RentRepository;
 
 import java.util.Map;
 import java.util.UUID;
 
 public class ClientManager {
     private final ClientRepository clientRepository;
+    private final RentRepository rentRepository;
     private static final Map<String, ClientType> clientTypes = Map.of(
             "DiamondMembership", ClientType.createDiamondMembership(),
             "Membership", ClientType.createMembership(),
             "NoMembership", ClientType.createNoMembership()
     );
 
-    public ClientManager(ClientRepository clientRepository) {
+    public ClientManager(ClientRepository clientRepository, RentRepository rentRepository) {
         this.clientRepository = clientRepository;
+        this.rentRepository = rentRepository;
     }
 
     public UUID addClient(String firstName, String lastName, long personalID, ClientType clientType) {
@@ -41,20 +44,16 @@ public class ClientManager {
         clientRepository.updateClient(client);
     }
 
-//    public void addRent(UUID clientId, UUID rentId) {
-//        Client client = getClient(clientId);
-//        client.addRent(rentId);
-//        clientRepository.updateClient(client);
-//    }
-//
-//    public void removeRent(UUID clientId, UUID rentId) {
-//        Client client = getClient(clientId);
-//        client.removeRent(rentId);
-//        clientRepository.updateClient(client);
-//    }
+    public boolean hasReachedRentalLimit(UUID clientId) {
+        Client client = getClient(clientId);
+        ClientType clientType = client.getClientType();
+        int maxAllowed = clientType.getMaxArticles();
+        int currentRentals = rentRepository.getRentByClientId(clientId).size();
+        return currentRentals >= maxAllowed;
+    }
 
     public void removeClient(UUID id) {
-        Client client = getClient(id);
+        rentRepository.getRentByClientId(id).forEach(rent -> rentRepository.removeRent(rent.getId()));
         clientRepository.removeClient(id);
     }
 

@@ -43,7 +43,6 @@ public class ItemRepository extends CassandraConfig {
 
     public void addItem(Item item) {
         if (item instanceof Music) {
-//            System.out.println(            ((Music) item).getGenreV());
             itemDao.create((Music) item);
         } else if (item instanceof Movie) {
             itemDao.create((Movie) item);

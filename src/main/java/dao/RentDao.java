@@ -1,5 +1,6 @@
 package dao;
 
+import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 import com.datastax.oss.driver.api.mapper.annotations.*;
 import models.Rent;
@@ -36,7 +37,7 @@ public interface RentDao {
     Row readByRentIdRaw(@CqlName("rent_id") UUID rentId);
 
     @Query("SELECT * FROM mediastore.rents_by_client_id WHERE client_id = :client_id")
-    List<Row> readByClientIdRaw(@CqlName("client_id") UUID clientId);
+    ResultSet readByClientIdRaw(@CqlName("client_id") UUID clientId);
 
     default Rent mapRowToRent(Row row) {
         Rent rent = new Rent();
@@ -59,13 +60,32 @@ public interface RentDao {
     }
 
     default List<Rent> readByClientId(UUID clientId) {
-        List<Row> rows = readByClientIdRaw(clientId);
-        return rows.stream().map(this::mapRowToRent).toList();
+        ResultSet resultSet = readByClientIdRaw(clientId);
+        return resultSet.all().stream().map(this::mapRowToRent).toList();
     }
 
-    // TODO: Nie moze byc rent tylko tez trzeba wjebac jako wszysktie parametry tutaj
-//    @Update
-//    void update(Rent rent);
+    @Query("UPDATE mediastore.rents_by_rent_id SET begin_time = :begin_time, end_time = :end_time, " +
+            "rent_cost = :rent_cost, archive = :archive, item_id = :item_id " +
+            "WHERE rent_id = :rent_id")
+    void updateRentByRentId(@CqlName("rent_id") UUID rentId,
+                            @CqlName("begin_time") Instant beginTime,
+                            @CqlName("end_time") Instant endTime,
+                            @CqlName("rent_cost") int rentCost,
+                            @CqlName("archive") boolean archive,
+                            @CqlName("item_id") UUID itemId);
+
+//    @Query("UPDATE mediastore.rents_by_client_id SET begin_time = :begin_time, end_time = :end_time, " +
+//            "rent_cost = :rent_cost, archive = :archive, item_id = :item_id " +
+//            "WHERE client_id = :client_id AND rent_id = :rent_id")
+//
+//    void updateRentByClientId(@CqlName("client_id") UUID clientId,
+//                              @CqlName("rent_id") UUID rentId,
+//                              @CqlName("begin_time") Instant beginTime,
+//                              @CqlName("end_time") Instant endTime,
+//                              @CqlName("rent_cost") int rentCost,
+//                              @CqlName("archive") boolean archive,
+//                              @CqlName("item_id") UUID itemId);
+
 
     @Query("DELETE FROM mediastore.rents_by_rent_id WHERE rent_id = :rent_id")
     void deleteByRentId(@CqlName("rent_id") UUID rentId);

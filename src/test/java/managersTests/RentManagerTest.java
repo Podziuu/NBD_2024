@@ -43,14 +43,15 @@ public class RentManagerTest {
 
         clientRepository = new ClientRepository(session);
         itemRepository = new ItemRepository(session);
-        clientManager = new ClientManager(clientRepository);
-        itemManager = new ItemManager(itemRepository);
         rentRepository = new RentRepository(session);
+        clientManager = new ClientManager(clientRepository, rentRepository);
+        itemManager = new ItemManager(itemRepository);
         rentManager = new RentManager(rentRepository, clientManager, itemManager);
 
-        session.execute("TRUNCATE mediastore.rents");
-    }
+        session.execute("TRUNCATE mediastore.rents_by_client_id");
+        session.execute("TRUNCATE mediastore.rents_by_rent_id");
 
+    }
 
     @AfterEach
     public void tearDown() throws Exception {
@@ -70,38 +71,54 @@ public class RentManagerTest {
         assertEquals(rent.getItemId(), itemId);
         assertEquals(rent.getClientId(), clientId);
     }
-//
-//    @Test
-//    void rentItem_ExceedsMaxRentals() {
-//        ClientType clientType = ClientType.createNoMembership();
-//        UUID clientId = clientManager.addClient("John", "Doe", 1234L, clientType);
-//        UUID itemId1 = itemManager.addMusic(100, "Jazz Album", MusicGenre.Jazz, false);
-//        UUID itemId2 = itemManager.addMovie(100, "Movie", 90, true);
-//        UUID itemId3 = itemManager.addComics(100, "Comics", 30);
-//        UUID rentId = rentManager.rentItem(Instant.now(), clientId, itemId1);
-//        UUID rentId2 = rentManager.rentItem(Instant.now(), clientId, itemId2);
-//        assertThrows(IllegalArgumentException.class, () -> rentManager.rentItem(Instant.now(), clientId, itemId3));
-//    }
-//
-//    @Test
-//    void rentItem_ItemAlreadyRented() {
-//        ClientType clientType = ClientType.createDiamondMembership();
-//        UUID clientId = clientManager.addClient("John", "Doe", 1234L, clientType);
-//        UUID itemId = itemManager.addMusic(100, "Jazz Album", MusicGenre.Jazz, true);
-//        UUID rentId = rentManager.rentItem(Instant.now(), clientId, itemId);
-//        assertThrows(IllegalStateException.class, () -> rentManager.rentItem(Instant.now(), clientId, itemId));
-//    }
-//
-//    @Test
-//    void returnItem_Success() {
-//        ClientType clientType = ClientType.createDiamondMembership();
-//        UUID clientId = clientManager.addClient("John", "Doe", 1234L, clientType);
-//        UUID itemId = itemManager.addMusic(100, "Jazz Album", MusicGenre.Jazz, true);
-//        UUID rentId = rentManager.rentItem(Instant.now(), clientId, itemId);
-//        rentManager.returnItem(rentId);
-//        Item item = itemManager.getItem(itemId);
-//        assertTrue(item.isAvailable());
-//    }
+
+    @Test
+    void getRentByClientId_Success() {
+        ClientType clientType = ClientType.createDiamondMembership();
+        UUID clientId = clientManager.addClient("Jane", "Doe", 6789L, clientType);
+        UUID itemId1 = itemManager.addMusic(120, "Rock Album", MusicGenre.Jazz, true);
+        UUID itemId2 = itemManager.addMovie(150, "Action Movie", 120, true);
+
+        rentManager.rentItem(Instant.now(), clientId, itemId1);
+        rentManager.rentItem(Instant.now(), clientId, itemId2);
+
+        var rents = rentManager.getRentByClientId(clientId);
+        assertEquals(2, rents.size());
+        assertTrue(rents.stream().anyMatch(rent -> rent.getItemId().equals(itemId1)));
+        assertTrue(rents.stream().anyMatch(rent -> rent.getItemId().equals(itemId2)));
+    }
+
+    @Test
+    void rentItem_ExceedsMaxRentals() {
+        ClientType clientType = ClientType.createNoMembership();
+        UUID clientId = clientManager.addClient("John", "Doe", 1234L, clientType);
+        UUID itemId1 = itemManager.addMusic(100, "Jazz Album", MusicGenre.Jazz, false);
+        UUID itemId2 = itemManager.addMovie(100, "Movie", 90, true);
+        UUID itemId3 = itemManager.addComics(100, "Comics", 30);
+        UUID rentId = rentManager.rentItem(Instant.now(), clientId, itemId1);
+        UUID rentId2 = rentManager.rentItem(Instant.now(), clientId, itemId2);
+        assertThrows(IllegalArgumentException.class, () -> rentManager.rentItem(Instant.now(), clientId, itemId3));
+    }
+
+    @Test
+    void rentItem_ItemAlreadyRented() {
+        ClientType clientType = ClientType.createDiamondMembership();
+        UUID clientId = clientManager.addClient("John", "Doe", 1234L, clientType);
+        UUID itemId = itemManager.addMusic(100, "Jazz Album", MusicGenre.Jazz, true);
+        UUID rentId = rentManager.rentItem(Instant.now(), clientId, itemId);
+        assertThrows(IllegalStateException.class, () -> rentManager.rentItem(Instant.now(), clientId, itemId));
+    }
+
+    @Test
+    void returnItemByRentId() {
+        ClientType clientType = ClientType.createDiamondMembership();
+        UUID clientId = clientManager.addClient("John", "Doe", 1234L, clientType);
+        UUID itemId = itemManager.addMusic(100, "Jazz Album", MusicGenre.Jazz, true);
+        UUID rentId = rentManager.rentItem(Instant.now(), clientId, itemId);
+        rentManager.returnItem(rentId);
+        Item item = itemManager.getItem(itemId);
+        assertTrue(item.isAvailable());
+    }
 //
 //    @Test
 //    void returnItem_RentNotFound() {

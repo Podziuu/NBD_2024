@@ -32,10 +32,9 @@ public interface ItemDao {
     @Query("SELECT * FROM mediastore.items_by_id WHERE item_id = :id")
     Music readMusic(@CqlName("id") UUID id);
 
-    @Query("SELECT * FROM mediastore.items_by_id WHERE item_id = :id AND item_type = 'movie'")
+    @Query("SELECT * FROM mediastore.items_by_id WHERE item_id = :id")
     Movie readMovie(@CqlName("id") UUID id);
 
-    @Query("SELECT * FROM mediastore.items_by_id WHERE item_id = :id AND item_type = 'comics'")
+    @Query("SELECT * FROM mediastore.items_by_id WHERE item_id = :id")
     Comics readComics(@CqlName("id") UUID id);
 }
-

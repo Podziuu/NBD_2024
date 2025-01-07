@@ -1,6 +1,7 @@
 package managersTests;
 
 import managers.ClientManager;
+import managers.RentManager;
 import models.Client;
 import models.ClientType;
 import org.junit.jupiter.api.AfterEach;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.datastax.oss.driver.api.core.CqlSession;
 import config.CassandraConfig;
 import repos.ClientRepository;
+import repos.RentRepository;
 
 import java.util.UUID;
 
@@ -22,6 +24,7 @@ public class ClientManagerTest {
     private static CassandraConfig cassandraConfig;
     private static CqlSession session;
     private static ClientRepository clientRepository;
+    private static RentRepository rentRepository;
 
     @BeforeAll
     public static void setUp() {
@@ -33,18 +36,12 @@ public class ClientManagerTest {
         }
 
         clientRepository = new ClientRepository(session);
-        clientManager = new ClientManager(clientRepository);
+        rentRepository = new RentRepository(session);
+
+        clientManager = new ClientManager(clientRepository, rentRepository);
 
         session.execute("TRUNCATE mediastore.clients_by_id");
     }
-
-
-//    @AfterEach
-//    public void tearDown() throws Exception {
-//        if (cassandraConfig != null) {
-//            cassandraConfig.close();
-//        }
-//    }
 
     @Test
     public void testAddClient() {
@@ -60,7 +57,6 @@ public class ClientManagerTest {
         assertEquals(personalId, client.getPersonalId());
         assertEquals(clientType, client.getClientType());
     }
-
 
     @Test
     public void testUpdateClient() {

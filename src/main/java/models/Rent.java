@@ -5,8 +5,8 @@ import com.datastax.oss.driver.api.mapper.annotations.*;
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@CqlName("rents")
+//@Entity
+//@CqlName("rents_by_rent_id")
 public class Rent {
     @PartitionKey
     @CqlName("rent_id")

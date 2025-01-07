@@ -3,6 +3,7 @@ package managersTests;
 import managers.ItemManager;
 import models.*;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,13 +14,13 @@ import java.util.UUID;
 
 public class ItemManagerTest {
 
-    private ItemManager itemManager;
-    private CassandraConfig cassandraConfig;
-    private CqlSession session;
-    private ItemRepository itemRepository;
+    private static ItemManager itemManager;
+    private static CassandraConfig cassandraConfig;
+    private static CqlSession session;
+    private static ItemRepository itemRepository;
 
-    @BeforeEach
-    public void setUp() throws Exception {
+    @BeforeAll
+    public static void setUp() {
         cassandraConfig = new CassandraConfig();
 
         session = cassandraConfig.getSession();

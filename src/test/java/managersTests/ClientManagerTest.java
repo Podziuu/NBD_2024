@@ -4,6 +4,7 @@ import managers.ClientManager;
 import models.Client;
 import models.ClientType;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,13 +18,13 @@ import java.util.UUID;
 
 public class ClientManagerTest {
 
-    private ClientManager clientManager;
-    private CassandraConfig cassandraConfig;
-    private CqlSession session;
-    private ClientRepository clientRepository;
+    private static ClientManager clientManager;
+    private static CassandraConfig cassandraConfig;
+    private static CqlSession session;
+    private static ClientRepository clientRepository;
 
-    @BeforeEach
-    public void setUp() throws Exception {
+    @BeforeAll
+    public static void setUp() {
         cassandraConfig = new CassandraConfig();
 
         session = cassandraConfig.getSession();

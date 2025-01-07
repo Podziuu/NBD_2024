@@ -3,7 +3,6 @@ package dao;
 import com.datastax.oss.driver.api.mapper.annotations.*;
 import com.datastax.oss.driver.api.mapper.annotations.CqlName;
 import models.Client;
-//import providers.ClientProvider;
 
 import java.util.UUID;
 
@@ -18,6 +17,6 @@ public interface ClientDao {
     @Update
     void update(Client client);
 
-    @Query("DELETE FROM mediastore.clients_by_id WHERE client_id = :id")
-    void deleteById(@CqlName("id") UUID id);
+    @Query("DELETE FROM mediastore.clients_by_id WHERE client_id = :client_id")
+    void deleteById(@CqlName("client_id") UUID client_id);
 }

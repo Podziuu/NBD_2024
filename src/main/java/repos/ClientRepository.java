@@ -34,7 +34,7 @@ public class ClientRepository extends CassandraConfig implements IClientReposito
                 .withColumn("first_name", DataTypes.TEXT)
                 .withColumn("last_name", DataTypes.TEXT)
                 .withColumn("archive", DataTypes.BOOLEAN)
-                .withColumn("rents", DataTypes.listOf(DataTypes.UUID))
+//                .withColumn("rents", DataTypes.listOf(DataTypes.UUID))
                 .withColumn("discriminator", DataTypes.TEXT)
                 .build();
         session.execute(createClients);

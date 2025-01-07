@@ -41,17 +41,17 @@ public class ClientManager {
         clientRepository.updateClient(client);
     }
 
-    public void addRent(UUID clientId, UUID rentId) {
-        Client client = getClient(clientId);
-        client.addRent(rentId);
-        clientRepository.updateClient(client);
-    }
-
-    public void removeRent(UUID clientId, UUID rentId) {
-        Client client = getClient(clientId);
-        client.removeRent(rentId);
-        clientRepository.updateClient(client);
-    }
+//    public void addRent(UUID clientId, UUID rentId) {
+//        Client client = getClient(clientId);
+//        client.addRent(rentId);
+//        clientRepository.updateClient(client);
+//    }
+//
+//    public void removeRent(UUID clientId, UUID rentId) {
+//        Client client = getClient(clientId);
+//        client.removeRent(rentId);
+//        clientRepository.updateClient(client);
+//    }
 
     public void removeClient(UUID id) {
         Client client = getClient(id);

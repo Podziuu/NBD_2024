@@ -29,8 +29,8 @@ public class Client {
     @CqlName("client_type")
     private ClientType clientType;
 
-    @CqlName("rents")
-    private List<UUID> rents;
+//    @CqlName("rents")
+//    private List<UUID> rents;
 
     public Client(UUID id, long personalID, String firstName, String lastName, ClientType clientType) {
         this.id = id;
@@ -39,7 +39,7 @@ public class Client {
         this.lastName = lastName;
         this.clientType = clientType;
         this.archive = false;
-        this.rents = new ArrayList<>();
+//        this.rents = new ArrayList<>();
     }
 
     public Client() {}
@@ -92,25 +92,25 @@ public class Client {
         this.clientType = clientType;
     }
 
-    public List<UUID> getRents() {
-        return rents;
-    }
+//    public List<UUID> getRents() {
+//        return rents;
+//    }
 
-    public void setRents(List<UUID> rents) {
-        this.rents = rents;
-    }
-
-    public void addRent(UUID rent) {
-        this.rents.add(rent);
-    }
-
-    public void removeRent(UUID rent) {
-        this.rents.remove(rent);
-    }
-
-    public int getRentsCount() {
-        return rents.size();
-    }
+//    public void setRents(List<UUID> rents) {
+//        this.rents = rents;
+//    }
+//
+//    public void addRent(UUID rent) {
+//        this.rents.add(rent);
+//    }
+//
+//    public void removeRent(UUID rent) {
+//        this.rents.remove(rent);
+//    }
+//
+//    public int getRentsCount() {
+//        return rents.size();
+//    }
 
     public String getInfo() {
         return "Klient: \nImię: " + firstName + "\nNazwisko: " + lastName + "\nPesel: " + personalID;

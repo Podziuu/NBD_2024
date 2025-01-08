@@ -54,7 +54,7 @@ public class RentManager {
             itemManager.setAvailable(rent.getItemId());
             rent.setEndTime(Instant.now());
             rent.setArchive(true);
-            rentRepository.updateRentByRentId(rent);
+            rentRepository.updateRent(rent);
         } catch (Exception e) {
             throw new RuntimeException("Failed to return item: " + e.getMessage(), e);
         }

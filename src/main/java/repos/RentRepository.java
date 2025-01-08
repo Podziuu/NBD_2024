@@ -69,8 +69,19 @@ public class RentRepository extends CassandraConfig {
         return rentDao.readByClientId(id);
     }
 
+    public void updateRent(Rent rent) {
+        updateRentByClientId(rent);
+        updateRentByRentId(rent);
+    }
+
     public void updateRentByRentId(Rent rent) {
         rentDao.updateRentByRentId(rent.getId(),
+                rent.getBeginTime(), rent.getEndTime(),
+                rent.getRentCost(), rent.isArchive(), rent.getItemId());
+    }
+
+    public void updateRentByClientId(Rent rent) {
+        rentDao.updateRentByClientId(rent.getClientId() ,rent.getId(),
                 rent.getBeginTime(), rent.getEndTime(),
                 rent.getRentCost(), rent.isArchive(), rent.getItemId());
     }

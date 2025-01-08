@@ -74,17 +74,17 @@ public interface RentDao {
                             @CqlName("archive") boolean archive,
                             @CqlName("item_id") UUID itemId);
 
-//    @Query("UPDATE mediastore.rents_by_client_id SET begin_time = :begin_time, end_time = :end_time, " +
-//            "rent_cost = :rent_cost, archive = :archive, item_id = :item_id " +
-//            "WHERE client_id = :client_id AND rent_id = :rent_id")
-//
-//    void updateRentByClientId(@CqlName("client_id") UUID clientId,
-//                              @CqlName("rent_id") UUID rentId,
-//                              @CqlName("begin_time") Instant beginTime,
-//                              @CqlName("end_time") Instant endTime,
-//                              @CqlName("rent_cost") int rentCost,
-//                              @CqlName("archive") boolean archive,
-//                              @CqlName("item_id") UUID itemId);
+    @Query("UPDATE mediastore.rents_by_client_id SET begin_time = :begin_time, end_time = :end_time, " +
+            "rent_cost = :rent_cost, archive = :archive, item_id = :item_id " +
+            "WHERE client_id = :client_id AND rent_id = :rent_id")
+
+    void updateRentByClientId(@CqlName("client_id") UUID clientId,
+                              @CqlName("rent_id") UUID rentId,
+                              @CqlName("begin_time") Instant beginTime,
+                              @CqlName("end_time") Instant endTime,
+                              @CqlName("rent_cost") int rentCost,
+                              @CqlName("archive") boolean archive,
+                              @CqlName("item_id") UUID itemId);
 
 
     @Query("DELETE FROM mediastore.rents_by_rent_id WHERE rent_id = :rent_id")

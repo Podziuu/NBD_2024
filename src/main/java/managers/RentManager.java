@@ -1,10 +1,8 @@
 package managers;
 
 import models.Client;
-import models.ClientType;
 import models.Item;
 import models.Rent;
-import repos.IRentRepository;
 import repos.RentRepository;
 
 import java.time.Instant;

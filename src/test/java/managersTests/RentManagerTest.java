@@ -119,16 +119,26 @@ public class RentManagerTest {
         Item item = itemManager.getItem(itemId);
         assertTrue(item.isAvailable());
     }
-//
-//    @Test
-//    void returnItem_RentNotFound() {
-//        UUID randomUUID = UUID.randomUUID();
-//        assertThrows(IllegalArgumentException.class, () -> rentManager.returnItem(randomUUID));
-//    }
-//
-//    @Test
-//    void getRent_NotFound() {
-//        UUID randomUUID = UUID.randomUUID();
-//        assertThrows(IllegalArgumentException.class, () -> rentManager.getRent(randomUUID));
-//    }
+
+    @Test
+    void returnItem_RentNotFound() {
+        UUID randomUUID = UUID.randomUUID();
+        assertThrows(IllegalArgumentException.class, () -> rentManager.returnItem(randomUUID));
+    }
+
+    @Test
+    void getRent_NotFound() {
+        UUID randomUUID = UUID.randomUUID();
+        assertThrows(IllegalArgumentException.class, () -> rentManager.getRent(randomUUID));
+    }
+
+    @Test
+    void removeRent() {
+        ClientType clientType = ClientType.createDiamondMembership();
+        UUID clientId = clientManager.addClient("John", "Doe", 1234L, clientType);
+        UUID itemId = itemManager.addMusic(100, "Jazz Album", MusicGenre.Jazz, false);
+        UUID rentId = rentManager.rentItem(Instant.now(), clientId, itemId);
+        rentManager.removeRent(rentId);
+        assertThrows(IllegalArgumentException.class, () -> rentManager.getRent(rentId));
+    }
 }

@@ -13,7 +13,7 @@ import models.*;
 
 import java.util.UUID;
 
-public class ClientRepository extends CassandraConfig implements IClientRepository {
+public class ClientRepository extends CassandraConfig {
     private final CqlSession session;
     private final ClientMapper clientMapper;
     private final ClientDao clientDao;

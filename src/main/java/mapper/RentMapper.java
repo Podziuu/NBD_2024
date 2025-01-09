@@ -8,12 +8,8 @@ import dao.RentDao;
 
 @Mapper
 public interface RentMapper {
-    // TODO: zastanowic sie czy nie mozna usunac tych 2 tutaj
     @DaoFactory
-    RentDao rentDaoByClientId(@DaoKeyspace String keyspace, @DaoTable String table);
-
-    @DaoFactory
-    RentDao rentDaoByRentId(@DaoKeyspace String keyspace, @DaoTable String table);
+    RentDao rentDao(@DaoKeyspace String keyspace, @DaoTable String table);
 
     @DaoFactory
     RentDao rentDao();

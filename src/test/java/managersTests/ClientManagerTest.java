@@ -75,4 +75,16 @@ public class ClientManagerTest {
         clientManager.removeClient(clientId);
         assertNull(clientRepository.getClient(clientId));
     }
+
+    @Test
+    public void testArchiveAndUnarchiveClient() {
+        ClientType clientType = ClientType.createDiamondMembership();
+        UUID clientId = clientManager.addClient("Adam", "Małysz", 12345L, clientType);
+        clientManager.archiveClient(clientId);
+        Client client = clientRepository.getClient(clientId);
+        assertTrue(client.isArchive());
+        clientManager.unarchiveClient(clientId);
+        Client unarchiveClient = clientRepository.getClient(clientId);
+        assertFalse(unarchiveClient.isArchive());
+    }
 }

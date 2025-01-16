@@ -11,6 +11,7 @@ import java.util.UUID;
 
 @Dao
 public interface RentDao {
+    @StatementAttributes(consistencyLevel = "QUORUM")
     @Query("INSERT INTO mediastore.rents_by_rent_id (rent_id, client_id, begin_time, " +
             "end_time, rent_cost, archive, item_id) VALUES (:rent_id, :client_id," +
             ":begin_time, :end_time, :rent_cost, :archive, :item_id)")
@@ -22,6 +23,7 @@ public interface RentDao {
                             @CqlName("archive") boolean archive,
                             @CqlName("item_id") UUID itemId);
 
+    @StatementAttributes(consistencyLevel = "QUORUM")
     @Query("INSERT INTO mediastore.rents_by_client_id (client_id, rent_id, begin_time, " +
             "end_time, rent_cost, archive, item_id) VALUES (:client_id, :rent_id," +
             ":begin_time, :end_time, :rent_cost, :archive, :item_id)")
@@ -33,9 +35,11 @@ public interface RentDao {
                               @CqlName("archive") boolean archive,
                               @CqlName("item_id") UUID itemId);
 
+    @StatementAttributes(consistencyLevel = "ONE", pageSize = 100)
     @Query("SELECT * FROM mediastore.rents_by_rent_id WHERE rent_id = :rent_id")
     Row readByRentIdRaw(@CqlName("rent_id") UUID rentId);
 
+    @StatementAttributes(consistencyLevel = "ONE", pageSize = 100)
     @Query("SELECT * FROM mediastore.rents_by_client_id WHERE client_id = :client_id")
     ResultSet readByClientIdRaw(@CqlName("client_id") UUID clientId);
 
@@ -64,6 +68,7 @@ public interface RentDao {
         return resultSet.all().stream().map(this::mapRowToRent).toList();
     }
 
+    @StatementAttributes(consistencyLevel = "QUORUM")
     @Query("UPDATE mediastore.rents_by_rent_id SET begin_time = :begin_time, end_time = :end_time, " +
             "rent_cost = :rent_cost, archive = :archive, item_id = :item_id " +
             "WHERE rent_id = :rent_id")
@@ -74,6 +79,7 @@ public interface RentDao {
                             @CqlName("archive") boolean archive,
                             @CqlName("item_id") UUID itemId);
 
+    @StatementAttributes(consistencyLevel = "QUORUM")
     @Query("UPDATE mediastore.rents_by_client_id SET begin_time = :begin_time, end_time = :end_time, " +
             "rent_cost = :rent_cost, archive = :archive, item_id = :item_id " +
             "WHERE client_id = :client_id AND rent_id = :rent_id")
@@ -87,9 +93,11 @@ public interface RentDao {
                               @CqlName("item_id") UUID itemId);
 
 
+    @StatementAttributes(consistencyLevel = "QUORUM")
     @Query("DELETE FROM mediastore.rents_by_rent_id WHERE rent_id = :rent_id")
     void deleteByRentId(@CqlName("rent_id") UUID rentId);
 
+    @StatementAttributes(consistencyLevel = "QUORUM")
     @Query("DELETE FROM mediastore.rents_by_client_id WHERE client_id = :client_id AND rent_id = :rent_id")
     void deleteByClientId(@CqlName("client_id") UUID clientId, @CqlName("rent_id") UUID rentId);
 }

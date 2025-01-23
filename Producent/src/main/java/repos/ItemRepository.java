@@ -3,10 +3,7 @@ package repos;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.InsertOneResult;
-import config.AbstractMongoEntity;
-import config.MongoEntity;
 import models.Item;
 import org.bson.types.ObjectId;
 

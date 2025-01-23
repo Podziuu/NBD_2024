@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="14d20506-81c6-401a-87a5-7e10536624ca" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/Konsument.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/RentWithCompanyCodec.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/ConsumerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Producent/src/test/java/ProducentKonsumentTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Docker/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Docker/docker-compose.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Docker/keyFile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Docker/mongod.conf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../NBD_2024.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/Producent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/config/AbstractMongoEntity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/config/MongoEntity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/managers/ClientManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/managers/ItemManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/managers/RentManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/models/Client.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/models/ClientType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/models/Comics.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/models/Item.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/models/Movie.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/models/Music.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/models/MusicGenre.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/models/Rent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/repos/ClientRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/repos/ItemRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/repos/RentRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/resources/META-INF/persistence.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/test/java/ClientManagerTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/test/java/ItemManagerTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/test/java/ProducentTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/test/java/RentManagerTest.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="2s20QxKqCGvlQfDV6GNJBrMVww5" />
+  <component name="ProjectViewState">
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JUnit.ConsumerTest.executor": "Run",
+    "Maven.NBD_2024 [clean].executor": "Run",
+    "Maven.NBD_2024 [test].executor": "Run",
+    "Maven.Projekt-Konsument [install].executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "Kafka",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/plewkowicz/Studia/NBD/NBD_2024/Producent",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "reference.settings.project.maven.importing",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="ConsumerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="NBD_2024" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="MAIN_CLASS_NAME" value="ConsumerTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.ConsumerTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.22855.74" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.22855.74" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="14d20506-81c6-401a-87a5-7e10536624ca" name="Changes" comment="" />
+      <created>1737638349951</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1737638349951</updated>
+      <workItem from="1737638350945" duration="122000" />
+      <workItem from="1737639867431" duration="24000" />
+      <workItem from="1737639903522" duration="277000" />
+      <workItem from="1737640336540" duration="522000" />
+      <workItem from="1737641409864" duration="223000" />
+      <workItem from="1737641973961" duration="14000" />
+      <workItem from="1737642155150" duration="252000" />
+      <workItem from="1737642658388" duration="365000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

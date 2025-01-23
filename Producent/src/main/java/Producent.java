@@ -68,8 +68,8 @@ public class Producent {
 
     public void sendRent(Rent rent) {
         try {
-//            RentWithCompany rentWithCompany = new RentWithCompany(rent, RENTAL_COMPANY_NAME);
-            String rentJson = objectMapper.writeValueAsString(rent);
+            RentWithCompany rentWithCompany = new RentWithCompany(rent, RENTAL_COMPANY_NAME);
+            String rentJson = objectMapper.writeValueAsString(rentWithCompany);
 
             Long rentIdAsLong = convertObjectIdToLong(rent.getId());
             ProducerRecord<Long, String> record = new ProducerRecord<>(RENT_TOPIC, rentIdAsLong, rentJson);
@@ -118,25 +118,25 @@ public class Producent {
         }
     }
 
-//    static class RentWithCompany {
-//        private Rent rent;
-//        private String rentalCompany;
-//
-//        public RentWithCompany() {}
-//
-//        @JsonCreator
-//        public RentWithCompany(@JsonProperty("rent") Rent rent,
-//                               @JsonProperty("rentalCompany") String rentalCompany) {
-//            this.rent = rent;
-//            this.rentalCompany = rentalCompany;
-//        }
-//
-//        public Rent getRent() {
-//            return rent;
-//        }
-//
-//        public String getRentalCompany() {
-//            return rentalCompany;
-//        }
-//    }
+    static class RentWithCompany {
+        private Rent rent;
+        private String rentalCompany;
+
+        public RentWithCompany() {}
+
+        @JsonCreator
+        public RentWithCompany(@JsonProperty("rent") Rent rent,
+                               @JsonProperty("rentalCompany") String rentalCompany) {
+            this.rent = rent;
+            this.rentalCompany = rentalCompany;
+        }
+
+        public Rent getRent() {
+            return rent;
+        }
+
+        public String getRentalCompany() {
+            return rentalCompany;
+        }
+    }
 }

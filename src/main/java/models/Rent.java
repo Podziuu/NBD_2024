@@ -1,10 +1,11 @@
 package models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.bson.codecs.pojo.annotations.*;
 import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Rent {
     @BsonId
     private ObjectId id;
@@ -20,6 +21,9 @@ public class Rent {
     private Client client;
     @BsonProperty("item")
     private Item item;
+
+    @BsonProperty("rentalCompany")
+    private String rentalCompany;
 
     @BsonCreator
     public Rent(@BsonProperty("beginTime") LocalDateTime beginTime,
@@ -58,10 +62,10 @@ public class Rent {
         this.beginTime = beginTime;
     }
 
-    @BsonIgnore
-    public long getRentDays() {
-        return java.time.Duration.between(beginTime, endTime).toDays();
-    }
+//    @BsonIgnore
+//    public long getRentDays() {
+//        return java.time.Duration.between(beginTime, endTime).toDays();
+//    }
 
     public int getRentCost() {
         return rentCost;
@@ -98,5 +102,13 @@ public class Rent {
     @BsonIgnore
     public String getRentInfo() {
         return "Rent ID: " + id + ", Client: " + client.getFirstName() + ", Item: " + item.getItemName();
+    }
+
+    public String getRentalCompany() {
+        return rentalCompany;
+    }
+
+    public void setRentalCompany(String rentalCompany) {
+        this.rentalCompany = rentalCompany;
     }
 }

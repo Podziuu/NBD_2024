@@ -1,8 +1,10 @@
 package models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.bson.codecs.pojo.annotations.*;
 import org.bson.types.ObjectId;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @BsonDiscriminator("Item")
 public class Item {
     @BsonId
